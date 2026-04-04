@@ -1,6 +1,5 @@
 ---
 layout: default
-title: Hello World
 ---
 
 <div class="intro">
