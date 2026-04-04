@@ -12,7 +12,10 @@
 </head>
 <body>
   <header>
-    <a href="{{ '/' | relative_url }}" class="brand">{{ site.title }}</a>
+    <a href="{{ '/' | relative_url }}" class="brand">
+      <img src="{{ '/assets/logo.png' | relative_url }}" alt="{{ site.title }} logo" class="brand-logo">
+      {{ site.title }}
+    </a>
   </header>
   <main>
     {{ content }}

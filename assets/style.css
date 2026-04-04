@@ -42,6 +42,15 @@ header {
   color: var(--text);
   text-decoration: none;
   letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.brand-logo {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
 }
 
 .brand:hover {
