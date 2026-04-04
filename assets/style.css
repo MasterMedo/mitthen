@@ -1,0 +1,188 @@
+:root {
+  --bg: #f7f6f2;
+  --text: #1a1a1a;
+  --accent: #e63946;
+  --muted: #888;
+  --border: #ddd;
+  --max-width: 760px;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid var(--text);
+}
+
+.brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+}
+
+.brand:hover {
+  color: var(--accent);
+}
+
+/* Main */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+/* Footer */
+footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Typography */
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 1rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  max-width: 58ch;
+  font-weight: 300;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Home page */
+.intro {
+  margin-bottom: 3rem;
+}
+
+.intro p {
+  font-size: 1.15rem;
+  color: #444;
+}
+
+.products {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+}
+
+.products h2 {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.product-card {
+  display: block;
+  padding: 1.25rem 1.5rem;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.product-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.product-card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.04em;
+}
+
+.product-card-sub {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 300;
+  margin-top: 0.25rem;
+}
+
+/* Product page */
+.product-image {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  display: block;
+  margin: 0 auto 2.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.product-title {
+  margin-bottom: 0.5rem;
+}
+
+.product-desc {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 2.5rem;
+  max-width: 52ch;
+  font-weight: 300;
+}
+
+.buy-wrap {
+  margin-bottom: 2.5rem;
+}
+
+.back-link {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.back-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  header { padding: 1rem 1.25rem; }
+  main { padding: 2.5rem 1.25rem; }
+}
