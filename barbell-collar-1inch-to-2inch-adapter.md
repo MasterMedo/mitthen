@@ -3,7 +3,7 @@ layout: page
 title: Barbell Collar 1 Inch to 2 Inch Adapter
 ---
 
-<img src="{{ '/assets/adapter.jpg' | relative_url }}" alt="Barbell Collar 1 Inch to 2 Inch Adapter" class="product-image">
+<img src="{{ '/assets/adapter.png' | relative_url }}" alt="Barbell Collar 1 Inch to 2 Inch Adapter" class="product-image">
 
 <h1 class="product-title">Barbell Collar<br>1&Prime; to 2&Prime; Adapter</h1>
 
