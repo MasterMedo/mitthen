@@ -15,7 +15,7 @@ layout: default
     </div>
     <div class="product-card-info">
       <div class="product-card-title">Barbell Collar 1&Prime; to 2&Prime; Adapter</div>
-      <div class="product-card-sub">Fit Olympic plates on a standard barbell</div>
+      <div class="product-card-sub">Fit Olympic plates on a 1 inch barbell / dumbbell / loading pin</div>
     </div>
   </a>
 </div>

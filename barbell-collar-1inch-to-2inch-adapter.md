@@ -8,7 +8,7 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
 <h1 class="product-title">Barbell Collar<br>1&Prime; to 2&Prime; Adapter</h1>
 
 <p class="product-desc">
-  Adapt your 1-inch standard barbell to fit 2-inch Olympic weight plates.
+  Adapt your 1-inch barbell / dumbbell / loading pin to fit 2-inch Olympic weight plates.
   Solid construction, secure fit — no wobble, no compromise.
 </p>
 
