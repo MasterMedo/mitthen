@@ -1,0 +1,62 @@
+---
+layout: default
+---
+
+<img src="{{ '/assets/' | append: page.image | relative_url }}" alt="{{ page.title }}" class="product-image">
+
+<h1 class="product-title">{{ page.heading | replace: '\n', '<br>' }}</h1>
+
+<p class="product-desc">{{ page.description }}</p>
+
+<div id="product-config"
+  data-us-diameter="{{ site.data.collar_config.standard_us_sleeve_diameter_mm }}"
+  data-eu-diameter="{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }}"
+  data-outer-diameter="{{ site.data.collar_config.outer_diameter_mm }}"
+  data-height-min="{{ site.data.collar_config.height_min_mm }}"
+  data-height-max="{{ site.data.collar_config.height_max_mm }}"
+  data-height-default="{{ site.data.collar_config.default_height_mm }}"
+  data-worker-url="{{ site.worker_url }}"
+></div>
+
+<div class="variant-selector">
+  <div class="variant-group">
+    <div class="variant-label">Inner Diameter</div>
+    <div class="variant-options" id="inner-diameter-options">
+      <button class="variant-btn active" data-value="{{ site.data.collar_config.standard_us_sleeve_diameter_mm }}">{{ site.data.collar_config.standard_us_sleeve_diameter_mm }} mm &mdash; US Standard</button>
+      <button class="variant-btn" data-value="{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }}">{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }} mm &mdash; EU Standard</button>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Height</div>
+    <div class="variant-height-wrap">
+      <input type="number" id="height-input"
+        min="{{ site.data.collar_config.height_min_mm }}"
+        max="{{ site.data.collar_config.height_max_mm }}"
+        value="{{ site.data.collar_config.default_height_mm }}"
+        step="1">
+      <span class="variant-unit">mm</span>
+      <span class="variant-hint">({{ site.data.collar_config.height_min_mm }}&ndash;{{ site.data.collar_config.height_max_mm }})</span>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Quantity</div>
+    <div class="variant-options" id="quantity-options">
+      <button class="variant-btn active" data-value="single">Single</button>
+      <button class="variant-btn" data-value="pair">Pair</button>
+    </div>
+  </div>
+</div>
+
+<div class="buy-wrap">
+  <div class="product-price" id="product-price">CHF —</div>
+  <button class="checkout-btn" id="checkout-btn">Buy Now</button>
+  <div class="checkout-error" id="checkout-error"></div>
+</div>
+
+<a href="{{ '/' | relative_url }}" class="back-link">← Back to shop</a>
+
+<div class="snackbar" id="snackbar"></div>
+
+<script src="{{ '/assets/product.js' | relative_url }}"></script>
