@@ -221,9 +221,17 @@
         return '<img class="gallery-media" src="/assets/' + src + '" alt="">';
       }
 
-      function dots_html() {
-        return src_list.map(function (_, i) {
-          return '<button class="gallery-dot' + (i === index ? ' active' : '') + '" data-i="' + i + '" aria-label="Go to image ' + (i + 1) + '"></button>';
+      function thumbs_html() {
+        return src_list.map(function (src, i) {
+          var cls = 'gallery-thumb' + (i === index ? ' active' : '');
+          if (is_video(src)) {
+            return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to video ' + (i + 1) + '">' +
+              '<video src="/assets/' + src + '" muted></video>' +
+            '</button>';
+          }
+          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to image ' + (i + 1) + '">' +
+            '<img src="/assets/' + src + '" alt="">' +
+          '</button>';
         }).join('');
       }
 
@@ -231,7 +239,7 @@
         var nav = src_list.length > 1
           ? '<div class="gallery-nav">' +
               '<button class="gallery-arrow gallery-prev" aria-label="Previous">&#8592;</button>' +
-              '<div class="gallery-dots">' + dots_html() + '</div>' +
+              '<div class="gallery-thumbs">' + thumbs_html() + '</div>' +
               '<button class="gallery-arrow gallery-next" aria-label="Next">&#8594;</button>' +
             '</div>'
           : '';
@@ -250,7 +258,7 @@
             index = (index + 1) % src_list.length;
             render();
           });
-          self.querySelectorAll('.gallery-dot').forEach(function (btn) {
+          self.querySelectorAll('.gallery-thumb').forEach(function (btn) {
             btn.addEventListener('click', function () {
               index = parseInt(btn.dataset.i, 10);
               render();
