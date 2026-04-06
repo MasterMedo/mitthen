@@ -8,15 +8,16 @@
     height_max_mm:                  parseFloat(config_element.dataset.heightMax),
     default_height_mm:              parseFloat(config_element.dataset.heightDefault)
   };
-
   var WORKER_URL = config_element.dataset.workerUrl;
 
-  var inner_diameter_mm = CONFIG.standard_us_sleeve_diameter_mm;
-  var height_mm = CONFIG.default_height_mm;
-  var quantity = 'single';
+  var state = {
+    inner_diameter_mm: CONFIG.standard_us_sleeve_diameter_mm,
+    height_mm: CONFIG.default_height_mm,
+    quantity: 'single'
+  };
+
   var snackbar_timeout = null;
 
-  // Returns { clamped, value, message } — value and message only set when clamped or invalid
   function validate_height(height_value) {
     if (isNaN(height_value) || !Number.isInteger(height_value)) {
       return { valid: false, message: 'Height must be a whole number between ' + CONFIG.height_min_mm + ' and ' + CONFIG.height_max_mm + ' mm' };
@@ -40,95 +41,175 @@
     }, 3000);
   }
 
-  async function update_price() {
-    var price_element = document.getElementById('product-price');
-    var units = quantity === 'pair' ? 2 : 1;
-    var params = new URLSearchParams({
-      inner_diameter_mm: inner_diameter_mm,
-      outer_diameter_mm: CONFIG.outer_diameter_mm,
-      height_mm: height_mm,
-      quantity: units
+  function notify_price_elements() {
+    document.querySelectorAll('price-display').forEach(function (el) {
+      el.refresh();
     });
-    try {
-      var response = await fetch(WORKER_URL + '/price?' + params);
-      var data = await response.json();
-      price_element.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
-    } catch (error) {
-      price_element.textContent = 'CHF —';
-    }
   }
 
-  function select_option(group_id, clicked_button) {
-    document.querySelectorAll('#' + group_id + ' .variant-btn').forEach(function (button) {
-      button.classList.remove('active');
-    });
-    clicked_button.classList.add('active');
-  }
+  customElements.define('inner-diameter-picker', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Inner Diameter</div>' +
+          '<div class="variant-options" id="inner-diameter-options">' +
+            '<button class="variant-btn active" data-value="' + CONFIG.standard_us_sleeve_diameter_mm + '">' +
+              CONFIG.standard_us_sleeve_diameter_mm + ' mm &mdash; US Standard' +
+            '</button>' +
+            '<button class="variant-btn" data-value="' + CONFIG.standard_eu_sleeve_diameter_mm + '">' +
+              CONFIG.standard_eu_sleeve_diameter_mm + ' mm &mdash; EU Standard' +
+            '</button>' +
+          '</div>' +
+        '</div>';
 
-  document.getElementById('inner-diameter-options').addEventListener('click', function (event) {
-    var clicked_button = event.target.closest('.variant-btn');
-    if (!clicked_button) return;
-    inner_diameter_mm = parseFloat(clicked_button.dataset.value);
-    select_option('inner-diameter-options', clicked_button);
-    update_price();
-  });
-
-  document.getElementById('quantity-options').addEventListener('click', function (event) {
-    var clicked_button = event.target.closest('.variant-btn');
-    if (!clicked_button) return;
-    quantity = clicked_button.dataset.value;
-    select_option('quantity-options', clicked_button);
-    update_price();
-  });
-
-  document.getElementById('height-input').addEventListener('change', function () {
-    var result = validate_height(this.valueAsNumber);
-    if (!result.valid) {
-      this.value = height_mm;
-      show_snackbar(result.message);
-    } else if (result.clamped) {
-      height_mm = result.value;
-      this.value = height_mm;
-      show_snackbar(result.message);
-      update_price();
-    } else {
-      height_mm = result.value;
-      update_price();
+      this.querySelector('#inner-diameter-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.inner_diameter_mm = parseFloat(clicked.dataset.value);
+        notify_price_elements();
+      }.bind(this));
     }
   });
 
-  document.getElementById('checkout-btn').addEventListener('click', async function () {
-    var checkout_button = document.getElementById('checkout-btn');
-    var error_element = document.getElementById('checkout-error');
-    checkout_button.disabled = true;
-    checkout_button.textContent = 'Processing...';
-    error_element.textContent = '';
+  customElements.define('height-picker', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Height</div>' +
+          '<div class="variant-height-wrap">' +
+            '<input type="number" id="height-input"' +
+              ' min="' + CONFIG.height_min_mm + '"' +
+              ' max="' + CONFIG.height_max_mm + '"' +
+              ' value="' + CONFIG.default_height_mm + '"' +
+              ' step="1">' +
+            '<span class="variant-unit">mm</span>' +
+            '<span class="variant-hint">(' + CONFIG.height_min_mm + '&ndash;' + CONFIG.height_max_mm + ')</span>' +
+          '</div>' +
+        '</div>';
 
-    var items = [{
-      inner_diameter_mm: inner_diameter_mm,
-      outer_diameter_mm: CONFIG.outer_diameter_mm,
-      height_mm: height_mm,
-      quantity: quantity === 'pair' ? 2 : 1
-    }];
-
-    try {
-      var response = await fetch(WORKER_URL + '/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: items })
+      this.querySelector('#height-input').addEventListener('change', function () {
+        var result = validate_height(this.valueAsNumber);
+        if (!result.valid) {
+          this.value = state.height_mm;
+          show_snackbar(result.message);
+        } else if (result.clamped) {
+          state.height_mm = result.value;
+          this.value = state.height_mm;
+          show_snackbar(result.message);
+          notify_price_elements();
+        } else {
+          state.height_mm = result.value;
+          notify_price_elements();
+        }
       });
-      var data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Unexpected error');
-      }
-    } catch (error) {
-      error_element.textContent = 'Checkout failed — please try again.';
-      checkout_button.disabled = false;
-      checkout_button.textContent = 'Buy Now';
     }
   });
 
-  update_price();
+  customElements.define('quantity-picker', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Quantity</div>' +
+          '<div class="variant-options" id="quantity-options">' +
+            '<button class="variant-btn active" data-value="single">Single</button>' +
+            '<button class="variant-btn" data-value="pair">Pair</button>' +
+          '</div>' +
+        '</div>';
+
+      this.querySelector('#quantity-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.quantity = clicked.dataset.value;
+        notify_price_elements();
+      }.bind(this));
+    }
+  });
+
+  customElements.define('price-display', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML = '<div class="buy-wrap"><div class="product-price" id="product-price">CHF &mdash;</div></div>';
+      this.refresh();
+    }
+
+    async refresh() {
+      var price_element = this.querySelector('#product-price');
+      if (!price_element) return;
+      var units = state.quantity === 'pair' ? 2 : 1;
+      var params = new URLSearchParams({
+        inner_diameter_mm: state.inner_diameter_mm,
+        outer_diameter_mm: CONFIG.outer_diameter_mm,
+        height_mm: state.height_mm,
+        quantity: units
+      });
+      try {
+        var response = await fetch(WORKER_URL + '/price?' + params);
+        var data = await response.json();
+        price_element.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
+      } catch (error) {
+        price_element.textContent = 'CHF \u2014';
+      }
+    }
+  });
+
+  customElements.define('buy-button', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML =
+        '<button class="checkout-btn" id="checkout-btn">Buy Now</button>' +
+        '<div class="checkout-error" id="checkout-error"></div>';
+
+      this.querySelector('#checkout-btn').addEventListener('click', async function () {
+        var btn = this.querySelector('#checkout-btn');
+        var error_element = this.querySelector('#checkout-error');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        error_element.textContent = '';
+
+        var items = [{
+          inner_diameter_mm: state.inner_diameter_mm,
+          outer_diameter_mm: CONFIG.outer_diameter_mm,
+          height_mm: state.height_mm,
+          quantity: state.quantity === 'pair' ? 2 : 1
+        }];
+
+        try {
+          var response = await fetch(WORKER_URL + '/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: items })
+          });
+          var data = await response.json();
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            throw new Error(data.error || 'Unexpected error');
+          }
+        } catch (error) {
+          error_element.textContent = 'Checkout failed \u2014 please try again.';
+          btn.disabled = false;
+          btn.textContent = 'Buy Now';
+        }
+      }.bind(this));
+    }
+  });
+
+  customElements.define('back-to-shop', class extends HTMLElement {
+    connectedCallback() {
+      var href = document.querySelector('base') ? '/' : (window.location.pathname.replace(/\/[^/]*$/, '/') || '/');
+      this.innerHTML = '<a href="/" class="back-link">\u2190 Back to shop</a>';
+    }
+  });
+
+  // Wrap pickers in the variant-selector div once DOM is ready
+  document.addEventListener('DOMContentLoaded', function () {
+    var pickers = document.querySelectorAll('inner-diameter-picker, height-picker, quantity-picker');
+    if (pickers.length === 0) return;
+    var wrapper = document.createElement('div');
+    wrapper.className = 'variant-selector';
+    pickers[0].parentNode.insertBefore(wrapper, pickers[0]);
+    pickers.forEach(function (el) { wrapper.appendChild(el); });
+  });
 })();
