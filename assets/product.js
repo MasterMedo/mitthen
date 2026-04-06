@@ -79,24 +79,32 @@
         '<div class="variant-group">' +
           '<div class="variant-label">Height</div>' +
           '<div class="variant-height-wrap">' +
-            '<input type="number" id="height-input"' +
+            '<input type="range" id="height-input"' +
               ' min="' + CONFIG.height_min_mm + '"' +
               ' max="' + CONFIG.height_max_mm + '"' +
               ' value="' + CONFIG.default_height_mm + '"' +
               ' step="1">' +
-            '<span class="variant-unit">mm</span>' +
-            '<span class="variant-hint">(' + CONFIG.height_min_mm + '&ndash;' + CONFIG.height_max_mm + ')</span>' +
+            '<span class="variant-height-value" id="height-value">' + CONFIG.default_height_mm + ' mm</span>' +
           '</div>' +
         '</div>';
 
-      this.querySelector('#height-input').addEventListener('change', function () {
+      var input = this.querySelector('#height-input');
+      var label = this.querySelector('#height-value');
+
+      input.addEventListener('input', function () {
+        label.textContent = this.valueAsNumber + ' mm';
+      });
+
+      input.addEventListener('change', function () {
         var result = validate_height(this.valueAsNumber);
         if (!result.valid) {
           this.value = state.height_mm;
+          label.textContent = state.height_mm + ' mm';
           show_snackbar(result.message);
         } else if (result.clamped) {
           state.height_mm = result.value;
           this.value = state.height_mm;
+          label.textContent = state.height_mm + ' mm';
           show_snackbar(result.message);
           notify_price_elements();
         } else {
