@@ -204,6 +204,65 @@
     }
   });
 
+  customElements.define('product-gallery', class extends HTMLElement {
+    connectedCallback() {
+      var src_list = (this.getAttribute('images') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      if (src_list.length === 0) return;
+
+      var index = 0;
+      var self = this;
+
+      function is_video(src) { return /\.(mp4|webm)$/i.test(src); }
+
+      function media_tag(src) {
+        if (is_video(src)) {
+          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline></video>';
+        }
+        return '<img class="gallery-media" src="/assets/' + src + '" alt="">';
+      }
+
+      function dots_html() {
+        return src_list.map(function (_, i) {
+          return '<button class="gallery-dot' + (i === index ? ' active' : '') + '" data-i="' + i + '" aria-label="Go to image ' + (i + 1) + '"></button>';
+        }).join('');
+      }
+
+      function render() {
+        var nav = src_list.length > 1
+          ? '<div class="gallery-nav">' +
+              '<button class="gallery-arrow gallery-prev" aria-label="Previous">&#8592;</button>' +
+              '<div class="gallery-dots">' + dots_html() + '</div>' +
+              '<button class="gallery-arrow gallery-next" aria-label="Next">&#8594;</button>' +
+            '</div>'
+          : '';
+        self.innerHTML =
+          '<div class="gallery-wrap">' +
+            media_tag(src_list[index]) +
+            nav +
+          '</div>';
+
+        if (src_list.length > 1) {
+          self.querySelector('.gallery-prev').addEventListener('click', function () {
+            index = (index - 1 + src_list.length) % src_list.length;
+            render();
+          });
+          self.querySelector('.gallery-next').addEventListener('click', function () {
+            index = (index + 1) % src_list.length;
+            render();
+          });
+          self.querySelectorAll('.gallery-dot').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              index = parseInt(btn.dataset.i, 10);
+              render();
+            });
+          });
+        }
+      }
+
+      render();
+    }
+  });
+
   customElements.define('back-to-shop', class extends HTMLElement {
     connectedCallback() {
       var href = document.querySelector('base') ? '/' : (window.location.pathname.replace(/\/[^/]*$/, '/') || '/');
