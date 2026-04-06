@@ -38,6 +38,10 @@
       : mm + 'mm';
   }
 
+  function item_display_name(inner_diameter_mm, height_mm) {
+    return 'Barbell Collar Adapter \u2014 ' + format_id(inner_diameter_mm) + ' ID, ' + format_height(height_mm) + ' h';
+  }
+
 
   var snackbar_timeout = null;
 
@@ -315,7 +319,8 @@
           inner_diameter_mm: state.inner_diameter_mm,
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
-          quantity: state.quantity === 'pair' ? 2 : 1
+          quantity: state.quantity === 'pair' ? 2 : 1,
+          display_name: item_display_name(state.inner_diameter_mm, state.height_mm)
         }];
 
         try {
@@ -509,7 +514,8 @@
               inner_diameter_mm: i.inner_diameter_mm,
               outer_diameter_mm: i.outer_diameter_mm,
               height_mm:         i.height_mm,
-              quantity:          i.quantity
+              quantity:          i.quantity,
+              display_name:      item_display_name(i.inner_diameter_mm, i.height_mm)
             };
           });
 
