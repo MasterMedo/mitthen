@@ -378,7 +378,7 @@ a:hover {
 .variant-height-wrap input[type="range"] {
   flex: 1;
   max-width: 260px;
-  height: 4px;
+  height: 6px;
   accent-color: var(--accent);
   cursor: pointer;
   appearance: none;
@@ -392,8 +392,8 @@ a:hover {
 
 .variant-height-wrap input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
@@ -402,8 +402,8 @@ a:hover {
 }
 
 .variant-height-wrap input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
