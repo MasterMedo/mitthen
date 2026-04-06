@@ -208,6 +208,91 @@ a:hover {
   justify-content: center;
 }
 
+/* Variant selector */
+.variant-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.variant-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.variant-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.variant-btn {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.variant-btn:hover {
+  border-color: var(--text);
+}
+
+.variant-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.variant-height-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.variant-height-wrap input[type="number"] {
+  width: 5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+
+.variant-height-wrap input[type="number"]::-webkit-outer-spin-button,
+.variant-height-wrap input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.variant-height-wrap input[type="number"]:focus {
+  border-color: var(--text);
+}
+
+.variant-unit {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.variant-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 300;
+}
+
 .back-link {
   font-size: 0.9rem;
   color: var(--muted);
