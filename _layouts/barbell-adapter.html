@@ -1,0 +1,19 @@
+---
+layout: default
+---
+
+<div id="product-config" style="display:none"
+  data-us-diameter="{{ site.data.collar_config.standard_us_sleeve_diameter_mm }}"
+  data-eu-diameter="{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }}"
+  data-outer-diameter="{{ site.data.collar_config.outer_diameter_mm }}"
+  data-height-min="{{ site.data.collar_config.height_min_mm }}"
+  data-height-max="{{ site.data.collar_config.height_max_mm }}"
+  data-height-default="{{ site.data.collar_config.default_height_mm }}"
+  data-worker-url="{{ site.worker_url }}"
+></div>
+
+{{ content }}
+
+<div class="snackbar" id="snackbar"></div>
+
+<script src="{{ '/assets/product.js' | relative_url }}"></script>
