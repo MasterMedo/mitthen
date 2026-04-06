@@ -12,9 +12,35 @@
 
   var state = {
     inner_diameter_mm: CONFIG.standard_us_sleeve_diameter_mm,
+    inner_diameter_display: CONFIG.standard_us_sleeve_diameter_mm + 'mm',
     height_mm: CONFIG.default_height_mm,
-    quantity: 'single'
+    height_display: CONFIG.default_height_mm + 'mm',
+    quantity: 'single',
+    unit: 'mm'
   };
+
+  function mm_to_in(mm) {
+    return (mm / 25.4).toFixed(2);
+  }
+
+  // Fixed inch labels for known sleeve diameters; calculated fallback for others
+  var IN_LABELS = {};
+  IN_LABELS[CONFIG.standard_us_sleeve_diameter_mm] = '1\u2033';
+  IN_LABELS[CONFIG.standard_eu_sleeve_diameter_mm] = '1.18\u2033';
+
+  function format_id(mm) {
+    return state.unit === 'in'
+      ? (IN_LABELS[mm] || mm_to_in(mm) + '\u2033')
+      : mm + 'mm';
+  }
+
+  function format_height(mm) {
+    return state.unit === 'in'
+      ? (mm / 25.4).toFixed(2) + '\u2033'
+      : mm + 'mm';
+  }
+
+
 
   var snackbar_timeout = null;
 
@@ -94,17 +120,61 @@
     });
   }
 
+  function notify_unit_change() {
+    document.querySelectorAll('inner-diameter-picker, height-picker, cart-drawer').forEach(function (el) {
+      if (typeof el.refresh === 'function') el.refresh();
+      else if (typeof el._render === 'function') el._render();
+    });
+  }
+
+  customElements.define('unit-toggle', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Units</div>' +
+          '<div class="variant-options" id="unit-toggle-options">' +
+            '<button class="variant-btn' + (state.unit === 'mm' ? ' active' : '') + '" data-value="mm">mm</button>' +
+            '<button class="variant-btn' + (state.unit === 'in' ? ' active' : '') + '" data-value="in">in</button>' +
+          '</div>' +
+        '</div>';
+
+      this.querySelector('#unit-toggle-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.unit = clicked.dataset.value;
+        notify_unit_change();
+      }.bind(this));
+    }
+  });
+
   customElements.define('inner-diameter-picker', class extends HTMLElement {
     connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      var us_mm = CONFIG.standard_us_sleeve_diameter_mm;
+      var eu_mm = CONFIG.standard_eu_sleeve_diameter_mm;
+      var us_label = format_id(us_mm) + ' \u2014 US Standard';
+      var eu_label = format_id(eu_mm) + ' \u2014 EU Standard';
+      var us_active = state.inner_diameter_mm === us_mm;
+      state.inner_diameter_display = format_id(state.inner_diameter_mm);
+
       this.innerHTML =
         '<div class="variant-group">' +
           '<div class="variant-label">Inner Diameter</div>' +
           '<div class="variant-options" id="inner-diameter-options">' +
-            '<button class="variant-btn active" data-value="' + CONFIG.standard_us_sleeve_diameter_mm + '">' +
-              CONFIG.standard_us_sleeve_diameter_mm + ' mm &mdash; US Standard' +
+            '<button class="variant-btn' + (us_active ? ' active' : '') + '" data-value="' + us_mm + '">' +
+              us_label +
             '</button>' +
-            '<button class="variant-btn" data-value="' + CONFIG.standard_eu_sleeve_diameter_mm + '">' +
-              CONFIG.standard_eu_sleeve_diameter_mm + ' mm &mdash; EU Standard' +
+            '<button class="variant-btn' + (!us_active ? ' active' : '') + '" data-value="' + eu_mm + '">' +
+              eu_label +
             '</button>' +
           '</div>' +
         '</div>';
@@ -115,13 +185,22 @@
         this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
         clicked.classList.add('active');
         state.inner_diameter_mm = parseFloat(clicked.dataset.value);
+        state.inner_diameter_display = format_id(state.inner_diameter_mm);
         notify_price_elements();
       }.bind(this));
+    }
+
+    refresh() {
+      this._render();
     }
   });
 
   customElements.define('height-picker', class extends HTMLElement {
     connectedCallback() {
+      var initial_label = state.unit === 'in'
+        ? mm_to_in(CONFIG.default_height_mm) + ' in'
+        : CONFIG.default_height_mm + ' mm';
+
       this.innerHTML =
         '<div class="variant-group">' +
           '<div class="variant-label">Height</div>' +
@@ -131,7 +210,7 @@
               ' max="' + CONFIG.height_max_mm + '"' +
               ' value="' + CONFIG.default_height_mm + '"' +
               ' step="1">' +
-            '<span class="variant-height-value" id="height-value">' + CONFIG.default_height_mm + ' mm</span>' +
+            '<span class="variant-height-value" id="height-value">' + initial_label + '</span>' +
           '</div>' +
         '</div>';
 
@@ -139,26 +218,42 @@
       var label = this.querySelector('#height-value');
 
       input.addEventListener('input', function () {
-        label.textContent = this.valueAsNumber + ' mm';
+        label.textContent = state.unit === 'in'
+          ? mm_to_in(this.valueAsNumber) + '\u2033'
+          : this.valueAsNumber + 'mm';
+        state.height_display = label.textContent;
       });
 
       input.addEventListener('change', function () {
         var result = validate_height(this.valueAsNumber);
         if (!result.valid) {
           this.value = state.height_mm;
-          label.textContent = state.height_mm + ' mm';
+          label.textContent = state.height_display;
           show_snackbar(result.message);
         } else if (result.clamped) {
           state.height_mm = result.value;
           this.value = state.height_mm;
-          label.textContent = state.height_mm + ' mm';
+          label.textContent = state.unit === 'in'
+            ? mm_to_in(state.height_mm) + '\u2033'
+            : state.height_mm + 'mm';
+          state.height_display = label.textContent;
           show_snackbar(result.message);
           notify_price_elements();
         } else {
           state.height_mm = result.value;
+          // height_display already updated by the preceding input event
           notify_price_elements();
         }
       });
+    }
+
+    refresh() {
+      var label = this.querySelector('#height-value');
+      if (!label) return;
+      label.textContent = state.unit === 'in'
+        ? mm_to_in(state.height_mm) + '\u2033'
+        : state.height_mm + 'mm';
+      state.height_display = label.textContent;
     }
   });
 
@@ -227,7 +322,8 @@
           inner_diameter_mm: state.inner_diameter_mm,
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
-          quantity: state.quantity === 'pair' ? 2 : 1
+          quantity: state.quantity === 'pair' ? 2 : 1,
+          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.height_display + ' h'
         }];
 
         try {
@@ -324,10 +420,12 @@
 
       this.querySelector('#add-to-cart-btn').addEventListener('click', function () {
         var item = {
-          inner_diameter_mm: state.inner_diameter_mm,
-          outer_diameter_mm: CONFIG.outer_diameter_mm,
-          height_mm:         state.height_mm,
-          quantity:          state.quantity === 'pair' ? 2 : 1
+          inner_diameter_mm:      state.inner_diameter_mm,
+          outer_diameter_mm:      CONFIG.outer_diameter_mm,
+          height_mm:              state.height_mm,
+          quantity:               state.quantity === 'pair' ? 2 : 1,
+          inner_diameter_display: state.inner_diameter_display,
+          height_display:         state.height_display
         };
         cart_add(item);
         show_snackbar('Added to cart');
@@ -365,8 +463,9 @@
       } else {
         items_html = '<ul class="cart-item-list">' +
           items.map(function (item, index) {
-            var spec = item.inner_diameter_mm + '\u200amm ID \u00b7 ' +
-                       item.height_mm + '\u200amm tall \u00b7 qty\u00a0' + item.quantity;
+            var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
+            var h_label  = item.height_display         || format_height(item.height_mm);
+            var spec = id_label + '\u200a ID \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
@@ -417,11 +516,14 @@
           if (error_el) error_el.textContent = '';
 
           var checkout_items = cart_load().map(function (i) {
+            var id_label = i.inner_diameter_display || format_id(i.inner_diameter_mm);
+            var h_label  = i.height_display         || format_height(i.height_mm);
             return {
               inner_diameter_mm: i.inner_diameter_mm,
               outer_diameter_mm: i.outer_diameter_mm,
               height_mm:         i.height_mm,
-              quantity:          i.quantity
+              quantity:          i.quantity,
+              display_name:      'Barbell Collar Adapter \u2014 ' + id_label + ' ID, ' + h_label + ' h'
             };
           });
 
@@ -486,7 +588,7 @@
 
   // Wrap pickers in the variant-selector div once DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
-    var pickers = document.querySelectorAll('inner-diameter-picker, height-picker, quantity-picker');
+    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, height-picker, quantity-picker');
     if (pickers.length === 0) return;
     var wrapper = document.createElement('div');
     wrapper.className = 'variant-selector';
