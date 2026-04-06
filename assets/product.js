@@ -21,6 +21,27 @@
     return (mm / 25.4).toFixed(2);
   }
 
+  // Fixed inch labels for known sleeve diameters; calculated fallback for others
+  var IN_LABELS = {};
+  IN_LABELS[CONFIG.standard_us_sleeve_diameter_mm] = '1\u2033';
+  IN_LABELS[CONFIG.standard_eu_sleeve_diameter_mm] = '1.18\u2033';
+
+  function format_id(mm) {
+    return state.unit === 'in'
+      ? (IN_LABELS[mm] || mm_to_in(mm) + '\u2033')
+      : mm + 'mm';
+  }
+
+  function format_height(mm) {
+    return state.unit === 'in'
+      ? (mm / 25.4).toFixed(1) + '\u2033'
+      : mm + 'mm';
+  }
+
+  function item_display_name(inner_diameter_mm, height_mm) {
+    return 'Barbell Collar Adapter \u2014 ' + format_id(inner_diameter_mm) + ' ID, ' + format_height(height_mm) + ' h';
+  }
+
   var snackbar_timeout = null;
 
   // ── Cart helpers ──────────────────────────────────────────────────────────
@@ -140,12 +161,8 @@
     _render() {
       var us_mm = CONFIG.standard_us_sleeve_diameter_mm;
       var eu_mm = CONFIG.standard_eu_sleeve_diameter_mm;
-      var us_label = state.unit === 'in'
-        ? mm_to_in(us_mm) + '\u2033 \u2014 US Standard'
-        : us_mm + ' mm \u2014 US Standard';
-      var eu_label = state.unit === 'in'
-        ? mm_to_in(eu_mm) + '\u2033 \u2014 EU Standard'
-        : eu_mm + ' mm \u2014 EU Standard';
+      var us_label = format_id(us_mm) + ' \u2014 US Standard';
+      var eu_label = format_id(eu_mm) + ' \u2014 EU Standard';
       var us_active = state.inner_diameter_mm === us_mm;
 
       this.innerHTML =
@@ -301,14 +318,15 @@
           inner_diameter_mm: state.inner_diameter_mm,
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
-          quantity: state.quantity === 'pair' ? 2 : 1
+          quantity: state.quantity === 'pair' ? 2 : 1,
+          display_name: item_display_name(state.inner_diameter_mm, state.height_mm)
         }];
 
         try {
           var response = await fetch(WORKER_URL + '/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: items, unit: state.unit })
+            body: JSON.stringify({ items: items })
           });
           var data = await response.json();
           if (data.url) {
@@ -439,11 +457,8 @@
       } else {
         items_html = '<ul class="cart-item-list">' +
           items.map(function (item, index) {
-            var spec = state.unit === 'in'
-              ? mm_to_in(item.inner_diameter_mm) + '\u200a\u2033 ID \u00b7 ' +
-                mm_to_in(item.height_mm) + '\u200a\u2033 tall \u00b7 qty\u00a0' + item.quantity
-              : item.inner_diameter_mm + '\u200amm ID \u00b7 ' +
-                item.height_mm + '\u200amm tall \u00b7 qty\u00a0' + item.quantity;
+            var spec = format_id(item.inner_diameter_mm) + '\u200a ID \u00b7 ' +
+                       format_height(item.height_mm) + ' tall \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
@@ -498,7 +513,8 @@
               inner_diameter_mm: i.inner_diameter_mm,
               outer_diameter_mm: i.outer_diameter_mm,
               height_mm:         i.height_mm,
-              quantity:          i.quantity
+              quantity:          i.quantity,
+              display_name:      item_display_name(i.inner_diameter_mm, i.height_mm)
             };
           });
 
