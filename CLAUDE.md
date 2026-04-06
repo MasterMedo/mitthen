@@ -4,3 +4,5 @@
 - Use Conventional Commits format for all commit messages: `type: description`
   - Common types: `feat`, `fix`, `chore`, `refactor`, `style`, `docs`, `test`
   - Example: `feat: add variant selector for diameter and height`
+- The Cloudflare Worker lives in the private `MasterMedo/mitthen-worker` repo, not here.
+- The `worker/` directory is gitignored — do not commit it to this repo.
