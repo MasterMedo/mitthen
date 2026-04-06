@@ -15,24 +15,28 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
 <div class="variant-selector">
   <div class="variant-group">
     <div class="variant-label">Inner Diameter</div>
-    <div class="variant-options" id="diameter-options">
-      <button class="variant-btn active" data-value="25.4">25.4 mm &mdash; US Standard</button>
-      <button class="variant-btn" data-value="30">30 mm &mdash; EU Standard</button>
+    <div class="variant-options" id="inner-diameter-options">
+      <button class="variant-btn active" data-value="{{ site.data.collar_config.standard_us_sleeve_diameter_mm }}">{{ site.data.collar_config.standard_us_sleeve_diameter_mm }} mm &mdash; US Standard</button>
+      <button class="variant-btn" data-value="{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }}">{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }} mm &mdash; EU Standard</button>
     </div>
   </div>
 
   <div class="variant-group">
     <div class="variant-label">Height</div>
     <div class="variant-height-wrap">
-      <input type="number" id="height-input" min="15" max="70" value="30" step="1">
+      <input type="number" id="height-input"
+        min="{{ site.data.collar_config.height_min_mm }}"
+        max="{{ site.data.collar_config.height_max_mm }}"
+        value="{{ site.data.collar_config.default_height_mm }}"
+        step="1">
       <span class="variant-unit">mm</span>
-      <span class="variant-hint">(15&ndash;70)</span>
+      <span class="variant-hint">({{ site.data.collar_config.height_min_mm }}&ndash;{{ site.data.collar_config.height_max_mm }})</span>
     </div>
   </div>
 
   <div class="variant-group">
     <div class="variant-label">Quantity</div>
-    <div class="variant-options" id="qty-options">
+    <div class="variant-options" id="quantity-options">
       <button class="variant-btn active" data-value="single">Single</button>
       <button class="variant-btn" data-value="pair">Pair</button>
     </div>
@@ -55,50 +59,62 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
 </div>
 
 <script>
-  var diameter = '25.4';
-  var height = '30';
-  var qty = 'single';
+  var CONFIG = {
+    standard_us_sleeve_diameter_mm: {{ site.data.collar_config.standard_us_sleeve_diameter_mm }},
+    standard_eu_sleeve_diameter_mm: {{ site.data.collar_config.standard_eu_sleeve_diameter_mm }},
+    outer_diameter_mm:              {{ site.data.collar_config.outer_diameter_mm }},
+    height_min_mm:                  {{ site.data.collar_config.height_min_mm }},
+    height_max_mm:                  {{ site.data.collar_config.height_max_mm }},
+    default_height_mm:              {{ site.data.collar_config.default_height_mm }}
+  };
+
+  var inner_diameter_mm = CONFIG.standard_us_sleeve_diameter_mm;
+  var height_mm = CONFIG.default_height_mm;
+  var quantity = 'single';
 
   function updateButton() {
-    var ref = 'dia-' + diameter + 'mm_h-' + height + 'mm_qty-' + qty;
-    var btnSingle = document.getElementById('btn-single');
-    var btnPair = document.getElementById('btn-pair');
-    if (qty === 'pair') {
-      btnSingle.style.display = 'none';
-      btnPair.style.display = '';
-      btnPair.setAttribute('client-reference-id', ref);
+    var client_reference_id = 'inner_diameter_mm=' + inner_diameter_mm
+      + '&outer_diameter_mm=' + CONFIG.outer_diameter_mm
+      + '&height_mm=' + height_mm
+      + '&quantity=' + quantity;
+    var button_single = document.getElementById('btn-single');
+    var button_pair = document.getElementById('btn-pair');
+    if (quantity === 'pair') {
+      button_single.style.display = 'none';
+      button_pair.style.display = '';
+      button_pair.setAttribute('client-reference-id', client_reference_id);
     } else {
-      btnSingle.style.display = '';
-      btnPair.style.display = 'none';
-      btnSingle.setAttribute('client-reference-id', ref);
+      button_single.style.display = '';
+      button_pair.style.display = 'none';
+      button_single.setAttribute('client-reference-id', client_reference_id);
     }
   }
 
-  document.getElementById('diameter-options').addEventListener('click', function(e) {
-    var btn = e.target.closest('.variant-btn');
-    if (!btn) return;
-    diameter = btn.dataset.value;
-    document.querySelectorAll('#diameter-options .variant-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
+  document.getElementById('inner-diameter-options').addEventListener('click', function(event) {
+    var clicked_button = event.target.closest('.variant-btn');
+    if (!clicked_button) return;
+    inner_diameter_mm = clicked_button.dataset.value;
+    document.querySelectorAll('#inner-diameter-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
+    clicked_button.classList.add('active');
     updateButton();
   });
 
-  document.getElementById('qty-options').addEventListener('click', function(e) {
-    var btn = e.target.closest('.variant-btn');
-    if (!btn) return;
-    qty = btn.dataset.value;
-    document.querySelectorAll('#qty-options .variant-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
+  document.getElementById('quantity-options').addEventListener('click', function(event) {
+    var clicked_button = event.target.closest('.variant-btn');
+    if (!clicked_button) return;
+    quantity = clicked_button.dataset.value;
+    document.querySelectorAll('#quantity-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
+    clicked_button.classList.add('active');
     updateButton();
   });
 
   document.getElementById('height-input').addEventListener('change', function() {
-    var v = parseInt(this.value, 10);
-    if (v >= 15 && v <= 70) {
-      height = String(v);
+    var height_value = this.valueAsNumber;
+    if (Number.isInteger(height_value) && height_value >= CONFIG.height_min_mm && height_value <= CONFIG.height_max_mm) {
+      height_mm = height_value;
       updateButton();
     } else {
-      this.value = height;
+      this.value = height_mm;
     }
   });
 
