@@ -308,7 +308,7 @@
           var response = await fetch(WORKER_URL + '/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: items })
+            body: JSON.stringify({ items: items, unit: state.unit })
           });
           var data = await response.json();
           if (data.url) {
@@ -506,7 +506,7 @@
             var response = await fetch(WORKER_URL + '/checkout', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ items: checkout_items })
+              body: JSON.stringify({ items: checkout_items, unit: state.unit })
             });
             var data = await response.json();
             if (data.url) {
