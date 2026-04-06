@@ -44,18 +44,9 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
 </div>
 
 <div class="buy-wrap">
-  <script async src="https://js.stripe.com/v3/buy-button.js"></script>
-  <stripe-buy-button
-    id="btn-single"
-    buy-button-id="buy_btn_1TIQx121DbKYvUxM9Gh812th"
-    publishable-key="pk_live_51TIOQ221DbKYvUxMY5e9qC8Obn8akN4b76mMGHhEibEtzDQVQb0dsUyoAurZyFYoucktNQOAgeY6huvcgLazF3OI00BXi11kaW"
-  ></stripe-buy-button>
-  <stripe-buy-button
-    id="btn-pair"
-    buy-button-id="buy_btn_1TIQx121DbKYvUxM9Gh812th"
-    publishable-key="pk_live_51TIOQ221DbKYvUxMY5e9qC8Obn8akN4b76mMGHhEibEtzDQVQb0dsUyoAurZyFYoucktNQOAgeY6huvcgLazF3OI00BXi11kaW"
-    style="display:none"
-  ></stripe-buy-button>
+  <div class="product-price" id="product-price">CHF —</div>
+  <button class="checkout-btn" id="checkout-btn">Buy Now</button>
+  <div class="checkout-error" id="checkout-error"></div>
 </div>
 
 <script>
@@ -68,35 +59,37 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     default_height_mm:              {{ site.data.collar_config.default_height_mm }}
   };
 
+  var WORKER_URL = 'https://mitthen-checkout.mitthen-com.workers.dev';
+
   var inner_diameter_mm = CONFIG.standard_us_sleeve_diameter_mm;
   var height_mm = CONFIG.default_height_mm;
   var quantity = 'single';
 
-  function updateButton() {
-    var client_reference_id = 'inner_diameter_mm=' + inner_diameter_mm
-      + '&outer_diameter_mm=' + CONFIG.outer_diameter_mm
-      + '&height_mm=' + height_mm
-      + '&quantity=' + quantity;
-    var button_single = document.getElementById('btn-single');
-    var button_pair = document.getElementById('btn-pair');
-    if (quantity === 'pair') {
-      button_single.style.display = 'none';
-      button_pair.style.display = '';
-      button_pair.setAttribute('client-reference-id', client_reference_id);
-    } else {
-      button_single.style.display = '';
-      button_pair.style.display = 'none';
-      button_single.setAttribute('client-reference-id', client_reference_id);
+  async function update_price() {
+    var price_element = document.getElementById('product-price');
+    var units = quantity === 'pair' ? 2 : 1;
+    var params = new URLSearchParams({
+      inner_diameter_mm: inner_diameter_mm,
+      outer_diameter_mm: CONFIG.outer_diameter_mm,
+      height_mm: height_mm,
+      quantity: units
+    });
+    try {
+      var response = await fetch(WORKER_URL + '/price?' + params);
+      var data = await response.json();
+      price_element.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
+    } catch (error) {
+      price_element.textContent = 'CHF —';
     }
   }
 
   document.getElementById('inner-diameter-options').addEventListener('click', function(event) {
     var clicked_button = event.target.closest('.variant-btn');
     if (!clicked_button) return;
-    inner_diameter_mm = clicked_button.dataset.value;
+    inner_diameter_mm = parseFloat(clicked_button.dataset.value);
     document.querySelectorAll('#inner-diameter-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
     clicked_button.classList.add('active');
-    updateButton();
+    update_price();
   });
 
   document.getElementById('quantity-options').addEventListener('click', function(event) {
@@ -105,20 +98,53 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     quantity = clicked_button.dataset.value;
     document.querySelectorAll('#quantity-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
     clicked_button.classList.add('active');
-    updateButton();
+    update_price();
   });
 
   document.getElementById('height-input').addEventListener('change', function() {
     var height_value = this.valueAsNumber;
     if (Number.isInteger(height_value) && height_value >= CONFIG.height_min_mm && height_value <= CONFIG.height_max_mm) {
       height_mm = height_value;
-      updateButton();
+      update_price();
     } else {
       this.value = height_mm;
     }
   });
 
-  updateButton();
+  document.getElementById('checkout-btn').addEventListener('click', async function() {
+    var checkout_button = document.getElementById('checkout-btn');
+    var error_element = document.getElementById('checkout-error');
+    checkout_button.disabled = true;
+    checkout_button.textContent = 'Processing...';
+    error_element.textContent = '';
+
+    var items = [{
+      inner_diameter_mm: inner_diameter_mm,
+      outer_diameter_mm: CONFIG.outer_diameter_mm,
+      height_mm: height_mm,
+      quantity: quantity === 'pair' ? 2 : 1
+    }];
+
+    try {
+      var response = await fetch(WORKER_URL + '/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: items })
+      });
+      var data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Unexpected error');
+      }
+    } catch (error) {
+      error_element.textContent = 'Checkout failed — please try again.';
+      checkout_button.disabled = false;
+      checkout_button.textContent = 'Buy Now';
+    }
+  });
+
+  update_price();
 </script>
 
 <a href="{{ '/' | relative_url }}" class="back-link">← Back to shop</a>

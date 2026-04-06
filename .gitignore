@@ -19,3 +19,6 @@ Gemfile.lock
 
 # macOS
 .DS_Store
+
+# Cloudflare Worker (lives in private repo MasterMedo/mitthen-worker)
+worker/
