@@ -18,6 +18,53 @@
 
   var snackbar_timeout = null;
 
+  // ── Cart helpers ──────────────────────────────────────────────────────────
+
+  var CART_KEY = 'mitthen_cart';
+
+  function cart_load() {
+    try {
+      return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function cart_save(items) {
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+    cart_notify();
+  }
+
+  function cart_add(item) {
+    var items = cart_load();
+    var match = items.find(function (i) {
+      return i.inner_diameter_mm === item.inner_diameter_mm &&
+             i.outer_diameter_mm === item.outer_diameter_mm &&
+             i.height_mm         === item.height_mm;
+    });
+    if (match) {
+      match.quantity += item.quantity;
+    } else {
+      items.push(item);
+    }
+    cart_save(items);
+    return items;
+  }
+
+  function cart_remove(index) {
+    var items = cart_load();
+    items.splice(index, 1);
+    cart_save(items);
+    return items;
+  }
+
+  /** Broadcast so header badge and open drawer refresh. */
+  function cart_notify() {
+    window.dispatchEvent(new CustomEvent('mitthen:cart-updated'));
+  }
+
+  // ── Shared utilities ──────────────────────────────────────────────────────
+
   function validate_height(height_value) {
     if (isNaN(height_value) || !Number.isInteger(height_value)) {
       return { valid: false, message: 'Height must be a whole number between ' + CONFIG.height_min_mm + ' and ' + CONFIG.height_max_mm + ' mm' };
@@ -268,6 +315,165 @@
       }
 
       render();
+    }
+  });
+
+  customElements.define('add-to-cart-button', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML = '<button class="add-to-cart-btn" id="add-to-cart-btn">Add to Cart</button>';
+
+      this.querySelector('#add-to-cart-btn').addEventListener('click', function () {
+        var item = {
+          inner_diameter_mm: state.inner_diameter_mm,
+          outer_diameter_mm: CONFIG.outer_diameter_mm,
+          height_mm:         state.height_mm,
+          quantity:          state.quantity === 'pair' ? 2 : 1
+        };
+        cart_add(item);
+        show_snackbar('Added to cart');
+        var drawer = document.querySelector('cart-drawer');
+        if (drawer) drawer.open();
+      });
+    }
+  });
+
+  customElements.define('cart-drawer', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+      window.addEventListener('mitthen:cart-updated', function () {
+        this._render();
+      }.bind(this));
+    }
+
+    open() {
+      this.classList.add('is-open');
+      document.body.classList.add('cart-drawer-open');
+    }
+
+    close() {
+      this.classList.remove('is-open');
+      document.body.classList.remove('cart-drawer-open');
+    }
+
+    _render() {
+      var self = this;
+      var items = cart_load();
+
+      var items_html;
+      if (items.length === 0) {
+        items_html = '<p class="cart-empty">Your cart is empty.</p>';
+      } else {
+        items_html = '<ul class="cart-item-list">' +
+          items.map(function (item, index) {
+            var spec = item.inner_diameter_mm + '\u200amm ID \u00b7 ' +
+                       item.height_mm + '\u200amm tall \u00b7 qty\u00a0' + item.quantity;
+            return '<li class="cart-item" data-index="' + index + '">' +
+              '<div class="cart-item-spec">' + spec + '</div>' +
+              '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
+              '<button class="cart-item-remove" data-index="' + index + '" aria-label="Remove item">&times;</button>' +
+            '</li>';
+          }).join('') +
+        '</ul>';
+      }
+
+      var footer_html = items.length > 0
+        ? '<div class="cart-footer">' +
+            '<div class="cart-total" id="cart-total">Total: CHF \u2014</div>' +
+            '<button class="checkout-btn cart-checkout-btn" id="cart-checkout-btn">Checkout</button>' +
+            '<div class="checkout-error" id="cart-checkout-error"></div>' +
+          '</div>'
+        : '';
+
+      this.innerHTML =
+        '<div class="cart-backdrop"></div>' +
+        '<div class="cart-panel">' +
+          '<div class="cart-header">' +
+            '<span class="cart-title">Cart</span>' +
+            '<button class="cart-close" aria-label="Close cart">&times;</button>' +
+          '</div>' +
+          '<div class="cart-body">' + items_html + '</div>' +
+          footer_html +
+        '</div>';
+
+      // Wire close
+      this.querySelector('.cart-backdrop').addEventListener('click', function () { self.close(); });
+      this.querySelector('.cart-close').addEventListener('click', function () { self.close(); });
+
+      // Wire remove buttons
+      this.querySelectorAll('.cart-item-remove').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = parseInt(btn.dataset.index, 10);
+          cart_remove(idx);
+        });
+      });
+
+      // Wire checkout
+      var checkout_btn = this.querySelector('#cart-checkout-btn');
+      if (checkout_btn) {
+        checkout_btn.addEventListener('click', async function () {
+          var error_el = self.querySelector('#cart-checkout-error');
+          checkout_btn.disabled = true;
+          checkout_btn.textContent = 'Processing...';
+          if (error_el) error_el.textContent = '';
+
+          var checkout_items = cart_load().map(function (i) {
+            return {
+              inner_diameter_mm: i.inner_diameter_mm,
+              outer_diameter_mm: i.outer_diameter_mm,
+              height_mm:         i.height_mm,
+              quantity:          i.quantity
+            };
+          });
+
+          try {
+            var response = await fetch(WORKER_URL + '/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: checkout_items })
+            });
+            var data = await response.json();
+            if (data.url) {
+              window.location.href = data.url;
+            } else {
+              throw new Error(data.error || 'Unexpected error');
+            }
+          } catch (err) {
+            if (error_el) error_el.textContent = 'Checkout failed \u2014 please try again.';
+            checkout_btn.disabled = false;
+            checkout_btn.textContent = 'Checkout';
+          }
+        });
+      }
+
+      // Fetch prices asynchronously
+      if (items.length > 0) {
+        self._fetch_prices(items);
+      }
+    }
+
+    async _fetch_prices(items) {
+      var self = this;
+      var total = 0;
+      var fetches = items.map(async function (item, index) {
+        var params = new URLSearchParams({
+          inner_diameter_mm: item.inner_diameter_mm,
+          outer_diameter_mm: item.outer_diameter_mm,
+          height_mm:         item.height_mm,
+          quantity:          item.quantity
+        });
+        try {
+          var response = await fetch(WORKER_URL + '/price?' + params);
+          var data = await response.json();
+          var price_el = self.querySelector('.cart-item-price[data-index="' + index + '"]');
+          if (price_el) price_el.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
+          total += data.total_price_chf;
+        } catch (e) {
+          // leave as em dash
+        }
+      });
+      await Promise.all(fetches);
+      var total_el = self.querySelector('#cart-total');
+      if (total_el) total_el.textContent = 'Total: CHF ' + total.toFixed(2);
     }
   });
 

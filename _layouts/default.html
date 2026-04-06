@@ -16,7 +16,40 @@
       <img src="{{ '/assets/logo.png' | relative_url }}" alt="{{ site.title }} logo" class="brand-logo">
       {{ site.title }}
     </a>
+    <button class="cart-icon-btn" id="cart-icon-btn" aria-label="Open cart">
+      <svg class="cart-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span class="cart-badge" id="cart-badge" hidden>0</span>
+    </button>
   </header>
+  <script>
+    (function () {
+      var CART_KEY = 'mitthen_cart';
+      function get_count() {
+        try {
+          var items = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+          return items.reduce(function (s, i) { return s + i.quantity; }, 0);
+        } catch (e) { return 0; }
+      }
+      function update_badge() {
+        var badge = document.getElementById('cart-badge');
+        if (!badge) return;
+        var n = get_count();
+        badge.textContent = n;
+        if (n > 0) { badge.removeAttribute('hidden'); } else { badge.setAttribute('hidden', ''); }
+      }
+      update_badge();
+      window.addEventListener('mitthen:cart-updated', update_badge);
+      window.addEventListener('storage', function (e) { if (e.key === CART_KEY) update_badge(); });
+      document.getElementById('cart-icon-btn').addEventListener('click', function () {
+        var drawer = document.querySelector('cart-drawer');
+        if (drawer) { drawer.open(); }
+      });
+    })();
+  </script>
   <main>
     {{ content }}
   </main>

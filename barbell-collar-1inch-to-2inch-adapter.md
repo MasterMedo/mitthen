@@ -14,6 +14,6 @@ Adapt your 1-inch barbell / dumbbell / loading pin to fit 2-inch Olympic weight 
 <quantity-picker></quantity-picker>
 
 <price-display></price-display>
-<buy-button></buy-button>
+<add-to-cart-button></add-to-cart-button>
 
 <back-to-shop></back-to-shop>
