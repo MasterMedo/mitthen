@@ -12,6 +12,16 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
   Solid construction, secure fit — no wobble, no compromise.
 </p>
 
+<div id="product-config"
+  data-us-diameter="{{ site.data.collar_config.standard_us_sleeve_diameter_mm }}"
+  data-eu-diameter="{{ site.data.collar_config.standard_eu_sleeve_diameter_mm }}"
+  data-outer-diameter="{{ site.data.collar_config.outer_diameter_mm }}"
+  data-height-min="{{ site.data.collar_config.height_min_mm }}"
+  data-height-max="{{ site.data.collar_config.height_max_mm }}"
+  data-height-default="{{ site.data.collar_config.default_height_mm }}"
+  data-worker-url="https://mitthen-checkout.mitthen-com.workers.dev"
+></div>
+
 <div class="variant-selector">
   <div class="variant-group">
     <div class="variant-label">Inner Diameter</div>
@@ -49,127 +59,8 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
   <div class="checkout-error" id="checkout-error"></div>
 </div>
 
-<script>
-  var CONFIG = {
-    standard_us_sleeve_diameter_mm: {{ site.data.collar_config.standard_us_sleeve_diameter_mm }},
-    standard_eu_sleeve_diameter_mm: {{ site.data.collar_config.standard_eu_sleeve_diameter_mm }},
-    outer_diameter_mm:              {{ site.data.collar_config.outer_diameter_mm }},
-    height_min_mm:                  {{ site.data.collar_config.height_min_mm }},
-    height_max_mm:                  {{ site.data.collar_config.height_max_mm }},
-    default_height_mm:              {{ site.data.collar_config.default_height_mm }}
-  };
-
-  var WORKER_URL = 'https://mitthen-checkout.mitthen-com.workers.dev';
-
-  var inner_diameter_mm = CONFIG.standard_us_sleeve_diameter_mm;
-  var height_mm = CONFIG.default_height_mm;
-  var quantity = 'single';
-
-  async function update_price() {
-    var price_element = document.getElementById('product-price');
-    var units = quantity === 'pair' ? 2 : 1;
-    var params = new URLSearchParams({
-      inner_diameter_mm: inner_diameter_mm,
-      outer_diameter_mm: CONFIG.outer_diameter_mm,
-      height_mm: height_mm,
-      quantity: units
-    });
-    try {
-      var response = await fetch(WORKER_URL + '/price?' + params);
-      var data = await response.json();
-      price_element.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
-    } catch (error) {
-      price_element.textContent = 'CHF —';
-    }
-  }
-
-  document.getElementById('inner-diameter-options').addEventListener('click', function(event) {
-    var clicked_button = event.target.closest('.variant-btn');
-    if (!clicked_button) return;
-    inner_diameter_mm = parseFloat(clicked_button.dataset.value);
-    document.querySelectorAll('#inner-diameter-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
-    clicked_button.classList.add('active');
-    update_price();
-  });
-
-  document.getElementById('quantity-options').addEventListener('click', function(event) {
-    var clicked_button = event.target.closest('.variant-btn');
-    if (!clicked_button) return;
-    quantity = clicked_button.dataset.value;
-    document.querySelectorAll('#quantity-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
-    clicked_button.classList.add('active');
-    update_price();
-  });
-
-  var snackbar_timeout = null;
-
-  function show_snackbar(message) {
-    var snackbar = document.getElementById('snackbar');
-    snackbar.textContent = message;
-    snackbar.classList.add('visible');
-    clearTimeout(snackbar_timeout);
-    snackbar_timeout = setTimeout(function() {
-      snackbar.classList.remove('visible');
-    }, 3000);
-  }
-
-  document.getElementById('height-input').addEventListener('change', function() {
-    var height_value = this.valueAsNumber;
-    if (isNaN(height_value) || !Number.isInteger(height_value)) {
-      this.value = height_mm;
-      show_snackbar('Height must be a whole number between ' + CONFIG.height_min_mm + ' and ' + CONFIG.height_max_mm + ' mm');
-    } else if (height_value < CONFIG.height_min_mm) {
-      height_mm = CONFIG.height_min_mm;
-      this.value = height_mm;
-      show_snackbar('Height snapped to minimum: ' + CONFIG.height_min_mm + ' mm');
-      update_price();
-    } else if (height_value > CONFIG.height_max_mm) {
-      height_mm = CONFIG.height_max_mm;
-      this.value = height_mm;
-      show_snackbar('Height snapped to maximum: ' + CONFIG.height_max_mm + ' mm');
-      update_price();
-    } else {
-      height_mm = height_value;
-      update_price();
-    }
-  });
-
-  document.getElementById('checkout-btn').addEventListener('click', async function() {
-    var checkout_button = document.getElementById('checkout-btn');
-    var error_element = document.getElementById('checkout-error');
-    checkout_button.disabled = true;
-    checkout_button.textContent = 'Processing...';
-    error_element.textContent = '';
-
-    var items = [{
-      inner_diameter_mm: inner_diameter_mm,
-      outer_diameter_mm: CONFIG.outer_diameter_mm,
-      height_mm: height_mm,
-      quantity: quantity === 'pair' ? 2 : 1
-    }];
-
-    try {
-      var response = await fetch(WORKER_URL + '/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: items })
-      });
-      var data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Unexpected error');
-      }
-    } catch (error) {
-      error_element.textContent = 'Checkout failed — please try again.';
-      checkout_button.disabled = false;
-      checkout_button.textContent = 'Buy Now';
-    }
-  });
-
-  update_price();
-</script>
-
 <a href="{{ '/' | relative_url }}" class="back-link">← Back to shop</a>
 
 <div class="snackbar" id="snackbar"></div>
+
+<script src="{{ '/assets/product.js' | relative_url }}"></script>
