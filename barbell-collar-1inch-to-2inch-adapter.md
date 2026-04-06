@@ -101,13 +101,36 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     update_price();
   });
 
+  var snackbar_timeout = null;
+
+  function show_snackbar(message) {
+    var snackbar = document.getElementById('snackbar');
+    snackbar.textContent = message;
+    snackbar.classList.add('visible');
+    clearTimeout(snackbar_timeout);
+    snackbar_timeout = setTimeout(function() {
+      snackbar.classList.remove('visible');
+    }, 3000);
+  }
+
   document.getElementById('height-input').addEventListener('change', function() {
     var height_value = this.valueAsNumber;
-    if (Number.isInteger(height_value) && height_value >= CONFIG.height_min_mm && height_value <= CONFIG.height_max_mm) {
-      height_mm = height_value;
+    if (isNaN(height_value) || !Number.isInteger(height_value)) {
+      this.value = height_mm;
+      show_snackbar('Height must be a whole number between ' + CONFIG.height_min_mm + ' and ' + CONFIG.height_max_mm + ' mm');
+    } else if (height_value < CONFIG.height_min_mm) {
+      height_mm = CONFIG.height_min_mm;
+      this.value = height_mm;
+      show_snackbar('Height snapped to minimum: ' + CONFIG.height_min_mm + ' mm');
+      update_price();
+    } else if (height_value > CONFIG.height_max_mm) {
+      height_mm = CONFIG.height_max_mm;
+      this.value = height_mm;
+      show_snackbar('Height snapped to maximum: ' + CONFIG.height_max_mm + ' mm');
       update_price();
     } else {
-      this.value = height_mm;
+      height_mm = height_value;
+      update_price();
     }
   });
 
@@ -148,3 +171,5 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
 </script>
 
 <a href="{{ '/' | relative_url }}" class="back-link">← Back to shop</a>
+
+<div class="snackbar" id="snackbar"></div>
