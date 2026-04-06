@@ -100,8 +100,9 @@
   }
 
   function notify_unit_change() {
-    document.querySelectorAll('inner-diameter-picker, height-picker').forEach(function (el) {
+    document.querySelectorAll('inner-diameter-picker, height-picker, cart-drawer').forEach(function (el) {
       if (typeof el.refresh === 'function') el.refresh();
+      else if (typeof el._render === 'function') el._render();
     });
   }
 
@@ -438,8 +439,11 @@
       } else {
         items_html = '<ul class="cart-item-list">' +
           items.map(function (item, index) {
-            var spec = item.inner_diameter_mm + '\u200amm ID \u00b7 ' +
-                       item.height_mm + '\u200amm tall \u00b7 qty\u00a0' + item.quantity;
+            var spec = state.unit === 'in'
+              ? mm_to_in(item.inner_diameter_mm) + '\u200a\u2033 ID \u00b7 ' +
+                mm_to_in(item.height_mm) + '\u200a\u2033 tall \u00b7 qty\u00a0' + item.quantity
+              : item.inner_diameter_mm + '\u200amm ID \u00b7 ' +
+                item.height_mm + '\u200amm tall \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
