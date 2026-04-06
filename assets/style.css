@@ -386,6 +386,8 @@ a:hover {
   background: var(--border);
   border-radius: 2px;
   outline: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .variant-height-wrap input[type="range"]::-webkit-slider-thumb {
@@ -407,6 +409,24 @@ a:hover {
   cursor: pointer;
   border: 2px solid #fff;
   box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+@media (pointer: coarse) {
+  .variant-height-wrap input[type="range"] {
+    height: 6px;
+  }
+
+  .variant-height-wrap input[type="range"]::-webkit-slider-thumb {
+    width: 30px;
+    height: 30px;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .variant-height-wrap input[type="range"]::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
 }
 
 .variant-height-value {
