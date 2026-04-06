@@ -12,7 +12,9 @@
 
   var state = {
     inner_diameter_mm: CONFIG.standard_us_sleeve_diameter_mm,
+    inner_diameter_display: CONFIG.standard_us_sleeve_diameter_mm + 'mm',
     height_mm: CONFIG.default_height_mm,
+    height_display: CONFIG.default_height_mm + 'mm',
     quantity: 'single',
     unit: 'mm'
   };
@@ -34,13 +36,10 @@
 
   function format_height(mm) {
     return state.unit === 'in'
-      ? (mm / 25.4).toFixed(1) + '\u2033'
+      ? (mm / 25.4).toFixed(2) + '\u2033'
       : mm + 'mm';
   }
 
-  function item_display_name(inner_diameter_mm, height_mm) {
-    return 'Barbell Collar Adapter \u2014 ' + format_id(inner_diameter_mm) + ' ID, ' + format_height(height_mm) + ' h';
-  }
 
 
   var snackbar_timeout = null;
@@ -165,6 +164,7 @@
       var us_label = format_id(us_mm) + ' \u2014 US Standard';
       var eu_label = format_id(eu_mm) + ' \u2014 EU Standard';
       var us_active = state.inner_diameter_mm === us_mm;
+      state.inner_diameter_display = format_id(state.inner_diameter_mm);
 
       this.innerHTML =
         '<div class="variant-group">' +
@@ -185,6 +185,7 @@
         this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
         clicked.classList.add('active');
         state.inner_diameter_mm = parseFloat(clicked.dataset.value);
+        state.inner_diameter_display = format_id(state.inner_diameter_mm);
         notify_price_elements();
       }.bind(this));
     }
@@ -218,28 +219,29 @@
 
       input.addEventListener('input', function () {
         label.textContent = state.unit === 'in'
-          ? mm_to_in(this.valueAsNumber) + ' in'
-          : this.valueAsNumber + ' mm';
+          ? mm_to_in(this.valueAsNumber) + '\u2033'
+          : this.valueAsNumber + 'mm';
+        state.height_display = label.textContent;
       });
 
       input.addEventListener('change', function () {
         var result = validate_height(this.valueAsNumber);
         if (!result.valid) {
           this.value = state.height_mm;
-          label.textContent = state.unit === 'in'
-            ? mm_to_in(state.height_mm) + ' in'
-            : state.height_mm + ' mm';
+          label.textContent = state.height_display;
           show_snackbar(result.message);
         } else if (result.clamped) {
           state.height_mm = result.value;
           this.value = state.height_mm;
           label.textContent = state.unit === 'in'
-            ? mm_to_in(state.height_mm) + ' in'
-            : state.height_mm + ' mm';
+            ? mm_to_in(state.height_mm) + '\u2033'
+            : state.height_mm + 'mm';
+          state.height_display = label.textContent;
           show_snackbar(result.message);
           notify_price_elements();
         } else {
           state.height_mm = result.value;
+          // height_display already updated by the preceding input event
           notify_price_elements();
         }
       });
@@ -249,8 +251,9 @@
       var label = this.querySelector('#height-value');
       if (!label) return;
       label.textContent = state.unit === 'in'
-        ? mm_to_in(state.height_mm) + ' in'
-        : state.height_mm + ' mm';
+        ? mm_to_in(state.height_mm) + '\u2033'
+        : state.height_mm + 'mm';
+      state.height_display = label.textContent;
     }
   });
 
@@ -320,7 +323,7 @@
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
           quantity: state.quantity === 'pair' ? 2 : 1,
-          display_name: item_display_name(state.inner_diameter_mm, state.height_mm)
+          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.height_display + ' h'
         }];
 
         try {
@@ -417,10 +420,12 @@
 
       this.querySelector('#add-to-cart-btn').addEventListener('click', function () {
         var item = {
-          inner_diameter_mm: state.inner_diameter_mm,
-          outer_diameter_mm: CONFIG.outer_diameter_mm,
-          height_mm:         state.height_mm,
-          quantity:          state.quantity === 'pair' ? 2 : 1
+          inner_diameter_mm:      state.inner_diameter_mm,
+          outer_diameter_mm:      CONFIG.outer_diameter_mm,
+          height_mm:              state.height_mm,
+          quantity:               state.quantity === 'pair' ? 2 : 1,
+          inner_diameter_display: state.inner_diameter_display,
+          height_display:         state.height_display
         };
         cart_add(item);
         show_snackbar('Added to cart');
@@ -458,8 +463,9 @@
       } else {
         items_html = '<ul class="cart-item-list">' +
           items.map(function (item, index) {
-            var spec = format_id(item.inner_diameter_mm) + '\u200a ID \u00b7 ' +
-                       format_height(item.height_mm) + ' tall \u00b7 qty\u00a0' + item.quantity;
+            var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
+            var h_label  = item.height_display         || format_height(item.height_mm);
+            var spec = id_label + '\u200a ID \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
@@ -510,12 +516,14 @@
           if (error_el) error_el.textContent = '';
 
           var checkout_items = cart_load().map(function (i) {
+            var id_label = i.inner_diameter_display || format_id(i.inner_diameter_mm);
+            var h_label  = i.height_display         || format_height(i.height_mm);
             return {
               inner_diameter_mm: i.inner_diameter_mm,
               outer_diameter_mm: i.outer_diameter_mm,
               height_mm:         i.height_mm,
               quantity:          i.quantity,
-              display_name:      item_display_name(i.inner_diameter_mm, i.height_mm)
+              display_name:      'Barbell Collar Adapter \u2014 ' + id_label + ' ID, ' + h_label + ' h'
             };
           });
 
@@ -523,7 +531,7 @@
             var response = await fetch(WORKER_URL + '/checkout', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ items: checkout_items, unit: state.unit })
+              body: JSON.stringify({ items: checkout_items })
             });
             var data = await response.json();
             if (data.url) {
