@@ -13,8 +13,13 @@
   var state = {
     inner_diameter_mm: CONFIG.standard_us_sleeve_diameter_mm,
     height_mm: CONFIG.default_height_mm,
-    quantity: 'single'
+    quantity: 'single',
+    unit: 'mm'
   };
+
+  function mm_to_in(mm) {
+    return (mm / 25.4).toFixed(2);
+  }
 
   var snackbar_timeout = null;
 
@@ -94,17 +99,63 @@
     });
   }
 
+  function notify_unit_change() {
+    document.querySelectorAll('inner-diameter-picker, height-picker').forEach(function (el) {
+      if (typeof el.refresh === 'function') el.refresh();
+    });
+  }
+
+  customElements.define('unit-toggle', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Units</div>' +
+          '<div class="variant-options" id="unit-toggle-options">' +
+            '<button class="variant-btn' + (state.unit === 'mm' ? ' active' : '') + '" data-value="mm">mm</button>' +
+            '<button class="variant-btn' + (state.unit === 'in' ? ' active' : '') + '" data-value="in">in</button>' +
+          '</div>' +
+        '</div>';
+
+      this.querySelector('#unit-toggle-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.unit = clicked.dataset.value;
+        notify_unit_change();
+      }.bind(this));
+    }
+  });
+
   customElements.define('inner-diameter-picker', class extends HTMLElement {
     connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      var us_mm = CONFIG.standard_us_sleeve_diameter_mm;
+      var eu_mm = CONFIG.standard_eu_sleeve_diameter_mm;
+      var us_label = state.unit === 'in'
+        ? mm_to_in(us_mm) + '\u2033 \u2014 US Standard'
+        : us_mm + ' mm \u2014 US Standard';
+      var eu_label = state.unit === 'in'
+        ? mm_to_in(eu_mm) + '\u2033 \u2014 EU Standard'
+        : eu_mm + ' mm \u2014 EU Standard';
+      var us_active = state.inner_diameter_mm === us_mm;
+
       this.innerHTML =
         '<div class="variant-group">' +
           '<div class="variant-label">Inner Diameter</div>' +
           '<div class="variant-options" id="inner-diameter-options">' +
-            '<button class="variant-btn active" data-value="' + CONFIG.standard_us_sleeve_diameter_mm + '">' +
-              CONFIG.standard_us_sleeve_diameter_mm + ' mm &mdash; US Standard' +
+            '<button class="variant-btn' + (us_active ? ' active' : '') + '" data-value="' + us_mm + '">' +
+              us_label +
             '</button>' +
-            '<button class="variant-btn" data-value="' + CONFIG.standard_eu_sleeve_diameter_mm + '">' +
-              CONFIG.standard_eu_sleeve_diameter_mm + ' mm &mdash; EU Standard' +
+            '<button class="variant-btn' + (!us_active ? ' active' : '') + '" data-value="' + eu_mm + '">' +
+              eu_label +
             '</button>' +
           '</div>' +
         '</div>';
@@ -118,10 +169,18 @@
         notify_price_elements();
       }.bind(this));
     }
+
+    refresh() {
+      this._render();
+    }
   });
 
   customElements.define('height-picker', class extends HTMLElement {
     connectedCallback() {
+      var initial_label = state.unit === 'in'
+        ? mm_to_in(CONFIG.default_height_mm) + ' in'
+        : CONFIG.default_height_mm + ' mm';
+
       this.innerHTML =
         '<div class="variant-group">' +
           '<div class="variant-label">Height</div>' +
@@ -131,7 +190,7 @@
               ' max="' + CONFIG.height_max_mm + '"' +
               ' value="' + CONFIG.default_height_mm + '"' +
               ' step="1">' +
-            '<span class="variant-height-value" id="height-value">' + CONFIG.default_height_mm + ' mm</span>' +
+            '<span class="variant-height-value" id="height-value">' + initial_label + '</span>' +
           '</div>' +
         '</div>';
 
@@ -139,19 +198,25 @@
       var label = this.querySelector('#height-value');
 
       input.addEventListener('input', function () {
-        label.textContent = this.valueAsNumber + ' mm';
+        label.textContent = state.unit === 'in'
+          ? mm_to_in(this.valueAsNumber) + ' in'
+          : this.valueAsNumber + ' mm';
       });
 
       input.addEventListener('change', function () {
         var result = validate_height(this.valueAsNumber);
         if (!result.valid) {
           this.value = state.height_mm;
-          label.textContent = state.height_mm + ' mm';
+          label.textContent = state.unit === 'in'
+            ? mm_to_in(state.height_mm) + ' in'
+            : state.height_mm + ' mm';
           show_snackbar(result.message);
         } else if (result.clamped) {
           state.height_mm = result.value;
           this.value = state.height_mm;
-          label.textContent = state.height_mm + ' mm';
+          label.textContent = state.unit === 'in'
+            ? mm_to_in(state.height_mm) + ' in'
+            : state.height_mm + ' mm';
           show_snackbar(result.message);
           notify_price_elements();
         } else {
@@ -159,6 +224,14 @@
           notify_price_elements();
         }
       });
+    }
+
+    refresh() {
+      var label = this.querySelector('#height-value');
+      if (!label) return;
+      label.textContent = state.unit === 'in'
+        ? mm_to_in(state.height_mm) + ' in'
+        : state.height_mm + ' mm';
     }
   });
 
@@ -486,7 +559,7 @@
 
   // Wrap pickers in the variant-selector div once DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
-    var pickers = document.querySelectorAll('inner-diameter-picker, height-picker, quantity-picker');
+    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, height-picker, quantity-picker');
     if (pickers.length === 0) return;
     var wrapper = document.createElement('div');
     wrapper.className = 'variant-selector';
