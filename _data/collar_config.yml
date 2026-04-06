@@ -4,5 +4,3 @@ outer_diameter_mm: 50.8
 height_min_mm: 15
 height_max_mm: 70
 default_height_mm: 15
-density: 2903
-price_per_gram_chf: 0.4

@@ -56,26 +56,31 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     outer_diameter_mm:              {{ site.data.collar_config.outer_diameter_mm }},
     height_min_mm:                  {{ site.data.collar_config.height_min_mm }},
     height_max_mm:                  {{ site.data.collar_config.height_max_mm }},
-    default_height_mm:              {{ site.data.collar_config.default_height_mm }},
-    density:                        {{ site.data.collar_config.density }},
-    price_per_gram_chf:             {{ site.data.collar_config.price_per_gram_chf }}
+    default_height_mm:              {{ site.data.collar_config.default_height_mm }}
   };
 
-  var CHECKOUT_URL = 'https://mitthen-checkout.mitthen-com.workers.dev';
+  var WORKER_URL = 'https://mitthen-checkout.mitthen-com.workers.dev';
 
   var inner_diameter_mm = CONFIG.standard_us_sleeve_diameter_mm;
   var height_mm = CONFIG.default_height_mm;
   var quantity = 'single';
 
-  function calculate_price_chf(inner_diameter_mm, outer_diameter_mm, height_mm) {
-    return height_mm * (Math.pow(outer_diameter_mm, 2) - Math.pow(inner_diameter_mm, 2)) / CONFIG.density * CONFIG.price_per_gram_chf;
-  }
-
-  function update_ui() {
-    var unit_price_chf = calculate_price_chf(inner_diameter_mm, CONFIG.outer_diameter_mm, height_mm);
+  async function update_price() {
+    var price_element = document.getElementById('product-price');
     var units = quantity === 'pair' ? 2 : 1;
-    var total_price_chf = unit_price_chf * units;
-    document.getElementById('product-price').textContent = 'CHF ' + total_price_chf.toFixed(2);
+    var params = new URLSearchParams({
+      inner_diameter_mm: inner_diameter_mm,
+      outer_diameter_mm: CONFIG.outer_diameter_mm,
+      height_mm: height_mm,
+      quantity: units
+    });
+    try {
+      var response = await fetch(WORKER_URL + '/price?' + params);
+      var data = await response.json();
+      price_element.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
+    } catch (error) {
+      price_element.textContent = 'CHF —';
+    }
   }
 
   document.getElementById('inner-diameter-options').addEventListener('click', function(event) {
@@ -84,7 +89,7 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     inner_diameter_mm = parseFloat(clicked_button.dataset.value);
     document.querySelectorAll('#inner-diameter-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
     clicked_button.classList.add('active');
-    update_ui();
+    update_price();
   });
 
   document.getElementById('quantity-options').addEventListener('click', function(event) {
@@ -93,14 +98,14 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     quantity = clicked_button.dataset.value;
     document.querySelectorAll('#quantity-options .variant-btn').forEach(function(button) { button.classList.remove('active'); });
     clicked_button.classList.add('active');
-    update_ui();
+    update_price();
   });
 
   document.getElementById('height-input').addEventListener('change', function() {
     var height_value = this.valueAsNumber;
     if (Number.isInteger(height_value) && height_value >= CONFIG.height_min_mm && height_value <= CONFIG.height_max_mm) {
       height_mm = height_value;
-      update_ui();
+      update_price();
     } else {
       this.value = height_mm;
     }
@@ -121,7 +126,7 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     }];
 
     try {
-      var response = await fetch(CHECKOUT_URL, {
+      var response = await fetch(WORKER_URL + '/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: items })
@@ -139,7 +144,7 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
     }
   });
 
-  update_ui();
+  update_price();
 </script>
 
 <a href="{{ '/' | relative_url }}" class="back-link">← Back to shop</a>
