@@ -3,7 +3,7 @@ layout: barbell-adapter
 title: Barbell Collar 1 Inch to 2 Inch Adapter
 ---
 
-<product-gallery images="adapter.png, adapter.png"></product-gallery>
+<product-gallery images="adapter.png, IMG_6587.jpeg, 28725927-3AC1-4894-B89A-F7F5B3F486C6.jpg"></product-gallery>
 
 # Barbell Collar 1″ to 2″ Adapter
 
