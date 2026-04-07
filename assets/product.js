@@ -495,9 +495,13 @@
             var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
             var od_label = item.outer_diameter_display || format_id(item.outer_diameter_mm);
             var h_label  = item.height_display         || format_height(item.height_mm);
-            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
-              '<div class="cart-item-spec">' + spec + '</div>' +
+              '<div class="cart-item-spec">' +
+                '<div class="cart-item-spec-line"><span class="cart-item-spec-label">ID</span> ' + id_label + '</div>' +
+                '<div class="cart-item-spec-line"><span class="cart-item-spec-label">OD</span> ' + od_label + '</div>' +
+                '<div class="cart-item-spec-line"><span class="cart-item-spec-label">Height</span> ' + h_label + '</div>' +
+                '<div class="cart-item-spec-qty">Quantity: ' + item.quantity + '</div>' +
+              '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
               '<button class="cart-item-remove" data-index="' + index + '" aria-label="Remove item">&times;</button>' +
             '</li>';

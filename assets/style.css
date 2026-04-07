@@ -535,6 +535,73 @@ header {
 /* Cart drawer */
 cart-drawer { display: contents; }
 
+.cart-item-spec-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.cart-item-spec-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.cart-item-spec-qty {
+  font-size: 0.875rem;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-top: 0.25rem;
+}
+
+.cart-item-spec-qty {
+  font-size: 0.875rem;
+}
+
+.cart-item-spec-qty {
+  display: block;
+}
+
+.cart-item-spec-qty {
+  font-weight: 500;
+}
+
+.cart-item-spec-qty {
+  text-align: right;
+}
+
+.cart-item-spec-qty {
+  color: var(--muted);
+}
+
+.cart-item-spec-qty {
+  font-size: 0.875rem;
+}
+
+.cart-item-spec-qty {
+  display: block;
+}
+
+.cart-item-spec-qty {
+  font-weight: 500;
+}
+
+.cart-item-spec-qty {
+  text-align: right;
+}
+
+.cart-item-spec-qty {
+  color: var(--muted);
+}
+
+.cart-item-spec-qty {
+  font-size: 0.875rem;
+}
+
+.cart-item-spec-qty {
+  display: block;
+}
+
 .cart-backdrop {
   display: none;
   position: fixed;
