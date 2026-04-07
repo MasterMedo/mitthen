@@ -34,6 +34,10 @@ body {
 header {
   padding: 1.5rem 2rem;
   border-bottom: 2px solid var(--text);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 150;
 }
 
 .brand {
