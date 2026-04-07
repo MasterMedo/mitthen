@@ -63,6 +63,11 @@
     cart_notify();
   }
 
+  function cart_clear() {
+    localStorage.setItem(CART_KEY, JSON.stringify([]));
+    cart_notify();
+  }
+
   function cart_add(item) {
     var items = cart_load();
     var match = items.find(function (i) {
