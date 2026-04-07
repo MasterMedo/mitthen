@@ -607,7 +607,7 @@ cart-drawer.is-open .cart-panel { transform: translateX(0); }
 
 .cart-item {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   align-items: center;
   gap: 0.5rem 0.75rem;
   padding-bottom: 0.75rem;

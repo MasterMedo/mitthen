@@ -121,18 +121,6 @@
     }, 3000);
   }
 
-  function show_post_add_confirm() {
-    // Minimal UX: prompt user to either go to checkout or keep shopping.
-    // Avoids building a full modal component for now.
-    var go_checkout = window.confirm('Added to cart. Go to checkout?');
-    if (go_checkout) {
-      var drawer = document.querySelector('cart-drawer');
-      if (drawer) drawer.open();
-      var btn = document.querySelector('#cart-checkout-btn');
-      if (btn) btn.click();
-    }
-  }
-
   function notify_price_elements() {
     document.querySelectorAll('price-display').forEach(function (el) {
       el.refresh();
@@ -470,7 +458,6 @@
         };
         cart_add(item);
         show_snackbar('Added to cart');
-        show_post_add_confirm();
       });
     }
   });
@@ -546,13 +533,13 @@
       // Wire qty input
       this.querySelectorAll('.cart-qty-input').forEach(function (input) {
         input.addEventListener('change', function () {
-          var idx = parseInt(input.dataset.index, 10);
-          var new_qty = parseInt(input.value, 10);
+          const idx = parseInt(input.dataset.index, 10);
+          let new_qty = parseInt(input.value, 10);
           if (isNaN(new_qty)) new_qty = 0;
           if (new_qty < 0) new_qty = 0;
 
-          var items = cart_load();
-          var item = items[idx];
+          const items = cart_load();
+          const item = items[idx];
           if (!item) return;
 
           if (new_qty === 0) {
