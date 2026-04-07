@@ -41,6 +41,18 @@
         badge.textContent = n;
         if (n > 0) { badge.removeAttribute('hidden'); } else { badge.setAttribute('hidden', ''); }
       }
+      // If the customer lands on the order-confirmed page, clear the cart.
+      // This prevents stale items/counts if they retry checkout.
+      var path = (window.location.pathname || '');
+      if (/\/order-confirmed(\/|$)/.test(path)) {
+        try {
+          localStorage.setItem(CART_KEY, JSON.stringify([]));
+        } catch (e) {
+          // ignore
+        }
+        window.dispatchEvent(new CustomEvent('mitthen:cart-updated'));
+      }
+
       update_badge();
       window.addEventListener('mitthen:cart-updated', update_badge);
       window.addEventListener('storage', function (e) { if (e.key === CART_KEY) update_badge(); });
