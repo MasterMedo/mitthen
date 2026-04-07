@@ -63,6 +63,11 @@
     cart_notify();
   }
 
+  function cart_clear() {
+    localStorage.setItem(CART_KEY, JSON.stringify([]));
+    cart_notify();
+  }
+
   function cart_add(item) {
     var items = cart_load();
     var match = items.find(function (i) {
@@ -357,6 +362,7 @@
           });
           var data = await response.json();
           if (data.url) {
+            cart_clear();
             window.location.href = data.url;
           } else {
             throw new Error(data.error || 'Unexpected error');
@@ -561,6 +567,7 @@
             });
             var data = await response.json();
             if (data.url) {
+              cart_clear();
               window.location.href = data.url;
             } else {
               throw new Error(data.error || 'Unexpected error');
