@@ -13,6 +13,7 @@ You need one per sleeve, so a pair works for dumbbells and barbells. Manufacturi
 
 <unit-toggle></unit-toggle>
 <inner-diameter-picker></inner-diameter-picker>
+<outer-diameter-display></outer-diameter-display>
 <height-picker></height-picker>
 <quantity-picker></quantity-picker>
 

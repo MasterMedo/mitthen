@@ -13,6 +13,7 @@
   var state = {
     inner_diameter_mm: CONFIG.standard_us_sleeve_diameter_mm,
     inner_diameter_display: CONFIG.standard_us_sleeve_diameter_mm + 'mm',
+    outer_diameter_display: CONFIG.outer_diameter_mm + 'mm',
     height_mm: CONFIG.default_height_mm,
     height_display: CONFIG.default_height_mm + 'mm',
     quantity: 'single',
@@ -27,6 +28,7 @@
   var IN_LABELS = {};
   IN_LABELS[CONFIG.standard_us_sleeve_diameter_mm] = '1\u2033';
   IN_LABELS[CONFIG.standard_eu_sleeve_diameter_mm] = '1.18\u2033';
+  IN_LABELS[CONFIG.outer_diameter_mm] = '2\u2033';
 
   function format_id(mm) {
     return state.unit === 'in'
@@ -121,7 +123,7 @@
   }
 
   function notify_unit_change() {
-    document.querySelectorAll('inner-diameter-picker, height-picker, cart-drawer').forEach(function (el) {
+    document.querySelectorAll('inner-diameter-picker, outer-diameter-display, height-picker, cart-drawer').forEach(function (el) {
       if (typeof el.refresh === 'function') el.refresh();
       else if (typeof el._render === 'function') el._render();
     });
@@ -188,6 +190,27 @@
         state.inner_diameter_display = format_id(state.inner_diameter_mm);
         notify_price_elements();
       }.bind(this));
+    }
+
+    refresh() {
+      this._render();
+    }
+  });
+
+  customElements.define('outer-diameter-display', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      state.outer_diameter_display = format_id(CONFIG.outer_diameter_mm);
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Outer Diameter</div>' +
+          '<div class="variant-options">' +
+            '<span class="variant-btn active">' + state.outer_diameter_display + '</span>' +
+          '</div>' +
+        '</div>';
     }
 
     refresh() {
@@ -323,7 +346,7 @@
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
           quantity: state.quantity === 'pair' ? 2 : 1,
-          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.height_display + ' h'
+          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.outer_diameter_display + ' OD, ' + state.height_display + ' h'
         }];
 
         try {
@@ -425,6 +448,7 @@
           height_mm:              state.height_mm,
           quantity:               state.quantity === 'pair' ? 2 : 1,
           inner_diameter_display: state.inner_diameter_display,
+          outer_diameter_display: state.outer_diameter_display,
           height_display:         state.height_display
         };
         cart_add(item);
@@ -464,8 +488,9 @@
         items_html = '<ul class="cart-item-list">' +
           items.map(function (item, index) {
             var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
+            var od_label = item.outer_diameter_display || format_id(item.outer_diameter_mm);
             var h_label  = item.height_display         || format_height(item.height_mm);
-            var spec = id_label + '\u200a ID \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
+            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
@@ -517,13 +542,14 @@
 
           var checkout_items = cart_load().map(function (i) {
             var id_label = i.inner_diameter_display || format_id(i.inner_diameter_mm);
+            var od_label = i.outer_diameter_display || format_id(i.outer_diameter_mm);
             var h_label  = i.height_display         || format_height(i.height_mm);
             return {
               inner_diameter_mm: i.inner_diameter_mm,
               outer_diameter_mm: i.outer_diameter_mm,
               height_mm:         i.height_mm,
               quantity:          i.quantity,
-              display_name:      'Barbell Collar Adapter \u2014 ' + id_label + ' ID, ' + h_label + ' h'
+              display_name:      'Barbell Collar Adapter \u2014 ' + id_label + ' ID, ' + od_label + ' OD, ' + h_label + ' h'
             };
           });
 
@@ -588,7 +614,7 @@
 
   // Wrap pickers in the variant-selector div once DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
-    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, height-picker, quantity-picker');
+    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, outer-diameter-display, height-picker, quantity-picker');
     if (pickers.length === 0) return;
     var wrapper = document.createElement('div');
     wrapper.className = 'variant-selector';
