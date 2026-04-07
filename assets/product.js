@@ -495,9 +495,13 @@
             var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
             var od_label = item.outer_diameter_display || format_id(item.outer_diameter_mm);
             var h_label  = item.height_display         || format_height(item.height_mm);
-            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
+            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall';
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
+              '<div class="cart-item-qty-wrap">' +
+                '<label class="cart-qty-label">Qty</label>' +
+                '<input class="cart-qty-input" type="number" min="0" step="1" data-index="' + index + '" value="' + item.quantity + '">' +
+              '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
               '<button class="cart-item-remove" data-index="' + index + '" aria-label="Remove item">&times;</button>' +
             '</li>';
@@ -528,7 +532,29 @@
       this.querySelector('.cart-backdrop').addEventListener('click', function () { self.close(); });
       this.querySelector('.cart-close').addEventListener('click', function () { self.close(); });
 
-      // Wire remove buttons
+      // Wire qty input
+      this.querySelectorAll('.cart-qty-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+          var idx = parseInt(input.dataset.index, 10);
+          var new_qty = parseInt(input.value, 10);
+          if (isNaN(new_qty)) new_qty = 0;
+          if (new_qty < 0) new_qty = 0;
+
+          var items = cart_load();
+          var item = items[idx];
+          if (!item) return;
+
+          if (new_qty === 0) {
+            cart_remove(idx);
+            return;
+          }
+
+          item.quantity = new_qty;
+          cart_save(items);
+        });
+      });
+
+      // Wire remove buttons (remove entire line item)
       this.querySelectorAll('.cart-item-remove').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var idx = parseInt(btn.dataset.index, 10);
