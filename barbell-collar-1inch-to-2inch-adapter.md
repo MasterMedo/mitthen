@@ -7,9 +7,9 @@ title: Barbell Collar 1 Inch to 2 Inch Adapter
 
 # Barbell Collar 1″ to 2″ Adapter
 
-Most home gym equipment — adjustable dumbbells, standard barbells, and loading pins — uses 1-inch (25mm) sleeves. Olympic weight plates have 2-inch (50mm) holes. This adapter bridges the gap, letting you load Olympic plates onto any narrow sleeve.
+This adapter lets you use 2-inch (50mm) Olympic weight plates on equipment with 1-inch (25mm) sleeves, like adjustable dumbbells, standard barbells, and loading pins. It fits snug and keeps the plates centered.
 
-Solid construction, secure fit — no wobble, no compromise. Buy a single adapter for a loading pin, or a pair for dumbbells and barbells. Manufacturing tolerance: ±0.3mm.
+You need one per sleeve, so a pair works for dumbbells and barbells. Manufacturing tolerance: ±0.3mm.
 
 <unit-toggle></unit-toggle>
 <inner-diameter-picker></inner-diameter-picker>
