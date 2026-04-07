@@ -121,6 +121,18 @@
     }, 3000);
   }
 
+  function show_post_add_confirm() {
+    // Minimal UX: prompt user to either go to checkout or keep shopping.
+    // Avoids building a full modal component for now.
+    var go_checkout = window.confirm('Added to cart. Go to checkout?');
+    if (go_checkout) {
+      var drawer = document.querySelector('cart-drawer');
+      if (drawer) drawer.open();
+      var btn = document.querySelector('#cart-checkout-btn');
+      if (btn) btn.click();
+    }
+  }
+
   function notify_price_elements() {
     document.querySelectorAll('price-display').forEach(function (el) {
       el.refresh();
@@ -458,8 +470,7 @@
         };
         cart_add(item);
         show_snackbar('Added to cart');
-        var drawer = document.querySelector('cart-drawer');
-        if (drawer) drawer.open();
+        show_post_add_confirm();
       });
     }
   });
