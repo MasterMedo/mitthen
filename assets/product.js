@@ -362,7 +362,6 @@
           });
           var data = await response.json();
           if (data.url) {
-            cart_clear();
             window.location.href = data.url;
           } else {
             throw new Error(data.error || 'Unexpected error');
@@ -567,7 +566,6 @@
             });
             var data = await response.json();
             if (data.url) {
-              cart_clear();
               window.location.href = data.url;
             } else {
               throw new Error(data.error || 'Unexpected error');
@@ -621,6 +619,13 @@
 
   // Wrap pickers in the variant-selector div once DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
+    // Clear cart only after the customer lands on the confirmation page.
+    // This avoids emptying the cart if the payment link fails and the customer retries.
+    var path = (window.location.pathname || '');
+    if (/\/order-confirmed(\/|$)/.test(path)) {
+      cart_clear();
+    }
+
     var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, outer-diameter-display, height-picker, quantity-picker');
     if (pickers.length === 0) return;
     var wrapper = document.createElement('div');
