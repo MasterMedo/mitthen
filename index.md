@@ -18,4 +18,13 @@ layout: default
       <div class="product-card-sub">Fit Olympic plates on a 1 inch barbell / dumbbell / loading pin</div>
     </div>
   </a>
+  <a href="{{ '/dumbbell-stand' | relative_url }}" class="product-card">
+    <div class="product-card-thumb">
+      <img src="{{ '/assets/dumbbell-stand-main.jpg' | relative_url }}" alt="Dumbbell Stand">
+    </div>
+    <div class="product-card-info">
+      <div class="product-card-title">Adjustable Dumbbell Stand</div>
+      <div class="product-card-sub">Keep your dumbbells off the floor with adjustable width</div>
+    </div>
+  </a>
 </div>

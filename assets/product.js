@@ -617,6 +617,116 @@
     }
   });
 
+  // ── Dumbbell Stand components ──────────────────────────────────────────────
+
+  customElements.define('width-picker', class extends HTMLElement {
+    connectedCallback() {
+      var config_el = document.getElementById('product-config');
+      var min = parseInt(config_el.dataset.minWidth, 10);
+      var max = parseInt(config_el.dataset.maxWidth, 10);
+      var def = parseInt(config_el.dataset.defaultWidth, 10);
+      var unit = config_el.dataset.weightUnit || 'mm';
+
+      function fmt(val) {
+        return unit === 'in' ? (val / 25.4).toFixed(1) + ' in' : val + ' mm';
+      }
+
+      var self = this;
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Width</div>' +
+          '<div class="variant-height-wrap">' +
+            '<input type="range" id="width-input" min="' + min + '" max="' + max + '" value="' + def + '" step="5">' +
+            '<span class="variant-height-value" id="width-value">' + fmt(def) + '</span>' +
+          '</div>' +
+        '</div>';
+
+      var input = this.querySelector('#width-input');
+      var label = this.querySelector('#width-value');
+
+      input.addEventListener('input', function () {
+        label.textContent = fmt(this.valueAsNumber);
+        dumbbell_state.width_display = label.textContent;
+      });
+
+      input.addEventListener('change', function () {
+        dumbbell_state.width_mm = this.valueAsNumber;
+        dumbbell_state.width_display = label.textContent;
+        dumbbell_notify_price_elements();
+      });
+
+      dumbbell_state.width_mm = def;
+      dumbbell_state.width_display = fmt(def);
+    }
+  });
+
+  var dumbbell_state = {
+    width_mm: 600,
+    width_display: '600 mm',
+    quantity: 'single',
+    unit: 'mm'
+  };
+
+  function dumbbell_notify_price_elements() {
+    document.querySelectorAll('.dumbbell-price').forEach(function (el) {
+      el.textContent = 'CHF \u2014'; // placeholder
+    });
+  }
+
+  customElements.define('dumbbell-price-display', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML = '<div class="buy-wrap"><div class="product-price dumbbell-price" id="dumbbell-price">CHF \u2014</div></div>';
+      this.refresh();
+    }
+
+    async refresh() {
+      var price_el = this.querySelector('#dumbbell-price');
+      if (!price_el) return;
+      var units = dumbbell_state.quantity === 'pair' ? 2 : 1;
+      var params = new URLSearchParams({
+        type: 'dumbbell_stand',
+        width_mm: dumbbell_state.width_mm,
+        quantity: units
+      });
+      try {
+        var response = await fetch(WORKER_URL + '/price?' + params);
+        var data = await response.json();
+        price_el.textContent = 'CHF ' + data.total_price_chf.toFixed(2);
+      } catch (error) {
+        price_el.textContent = 'CHF \u2014';
+      }
+    }
+  });
+
+  customElements.define('dumbbell-add-to-cart', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML = '<button class="add-to-cart-btn" id="dumbbell-add-btn">Add to Cart</button>';
+
+      this.querySelector('#dumbbell-add-btn').addEventListener('click', function () {
+        var item = {
+          type: 'dumbbell_stand',
+          width_mm: dumbbell_state.width_mm,
+          width_display: dumbbell_state.width_display,
+          quantity: dumbbell_state.quantity === 'pair' ? 2 : 1
+        };
+        // Reuse cart system with new item type
+        var items = cart_load();
+        var match = items.find(function (i) {
+          return i.type === 'dumbbell_stand' && i.width_mm === item.width_mm;
+        });
+        if (match) {
+          match.quantity += item.quantity;
+        } else {
+          items.push(item);
+        }
+        cart_save(items);
+        show_snackbar('Added to cart');
+        var drawer = document.querySelector('cart-drawer');
+        if (drawer) drawer.open();
+      });
+    }
+  });
+
   // Wrap pickers in the variant-selector div once DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
     var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, outer-diameter-display, height-picker, quantity-picker');

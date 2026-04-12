@@ -1,0 +1,16 @@
+---
+layout: default
+---
+
+<div id="product-config" style="display:none"
+  data-max-weight="{{ site.data.dumbbell_stand.max_weight_kg }}"
+  data-min-width="{{ site.data.dumbbell_stand.min_width_mm }}"
+  data-max-width="{{ site.data.dumbbell_stand.max_width_mm }}"
+  data-default-width="{{ site.data.dumbbell_stand.default_width_mm }}"
+  data-weight-unit="{{ site.data.dumbbell_stand.weight_unit }}"
+  data-worker-url="{{ site.worker_url }}"
+></div>
+
+{{ content }}
+
+<div class="snackbar" id="snackbar"></div>
