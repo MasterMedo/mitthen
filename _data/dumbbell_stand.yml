@@ -1,0 +1,5 @@
+max_weight_kg: 250
+min_width_mm: 500
+max_width_mm: 700
+default_width_mm: 600
+weight_unit: kg
