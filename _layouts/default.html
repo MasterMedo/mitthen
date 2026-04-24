@@ -53,6 +53,9 @@
       // This prevents stale items/counts if they retry checkout.
       var path = (window.location.pathname || '');
       if (/\/order-confirmed(\/|$)/.test(path)) {
+        if (typeof gtag === 'function') {
+          gtag('event', 'purchase', { event_category: 'ecommerce' });
+        }
         try {
           localStorage.setItem(CART_KEY, JSON.stringify([]));
         } catch (e) {
