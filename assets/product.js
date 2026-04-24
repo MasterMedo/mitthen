@@ -340,6 +340,9 @@
         '<div class="checkout-error" id="checkout-error"></div>';
 
       this.querySelector('#checkout-btn').addEventListener('click', async function () {
+        if (typeof gtag === 'function') {
+          gtag('event', 'begin_checkout', { event_category: 'ecommerce' });
+        }
         var btn = this.querySelector('#checkout-btn');
         var error_element = this.querySelector('#checkout-error');
         btn.disabled = true;
@@ -457,6 +460,13 @@
           height_display:         state.height_display
         };
         cart_add(item);
+        if (typeof gtag === 'function') {
+          gtag('event', 'add_to_cart', {
+            event_category: 'ecommerce',
+            event_label: item.inner_diameter_mm + 'x' + item.outer_diameter_mm + 'x' + item.height_mm,
+            value: item.quantity
+          });
+        }
         show_snackbar('Added to cart');
         var drawer = document.querySelector('cart-drawer');
         if (drawer) drawer.open();
@@ -540,6 +550,9 @@
       var checkout_btn = this.querySelector('#cart-checkout-btn');
       if (checkout_btn) {
         checkout_btn.addEventListener('click', async function () {
+          if (typeof gtag === 'function') {
+            gtag('event', 'begin_checkout', { event_category: 'ecommerce' });
+          }
           var error_el = self.querySelector('#cart-checkout-error');
           checkout_btn.disabled = true;
           checkout_btn.textContent = 'Processing...';
