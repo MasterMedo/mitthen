@@ -17,8 +17,10 @@ layout: default
 <script>
   if (typeof gtag === 'function') {
     gtag('event', 'view_item', {
-      event_category: 'ecommerce',
-      event_label: document.title
+      currency: 'CHF',
+      items: [{
+        item_name: document.title
+      }]
     });
   }
 </script>

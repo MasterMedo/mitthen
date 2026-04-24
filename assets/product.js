@@ -341,7 +341,14 @@
 
       this.querySelector('#checkout-btn').addEventListener('click', async function () {
         if (typeof gtag === 'function') {
-          gtag('event', 'begin_checkout', { event_category: 'ecommerce' });
+          gtag('event', 'begin_checkout', {
+            currency: 'CHF',
+            items: [{
+              item_name: 'Barbell Collar Adapter',
+              item_variant: state.inner_diameter_mm + 'x' + CONFIG.outer_diameter_mm + 'x' + state.height_mm,
+              quantity: state.quantity === 'pair' ? 2 : 1
+            }]
+          });
         }
         var btn = this.querySelector('#checkout-btn');
         var error_element = this.querySelector('#checkout-error');
@@ -462,9 +469,12 @@
         cart_add(item);
         if (typeof gtag === 'function') {
           gtag('event', 'add_to_cart', {
-            event_category: 'ecommerce',
-            event_label: item.inner_diameter_mm + 'x' + item.outer_diameter_mm + 'x' + item.height_mm,
-            value: item.quantity
+            currency: 'CHF',
+            items: [{
+              item_name: 'Barbell Collar Adapter',
+              item_variant: item.inner_diameter_mm + 'x' + item.outer_diameter_mm + 'x' + item.height_mm,
+              quantity: item.quantity
+            }]
           });
         }
         show_snackbar('Added to cart');
@@ -551,7 +561,14 @@
       if (checkout_btn) {
         checkout_btn.addEventListener('click', async function () {
           if (typeof gtag === 'function') {
-            gtag('event', 'begin_checkout', { event_category: 'ecommerce' });
+            var ga_items = cart_load().map(function (i) {
+              return {
+                item_name: 'Barbell Collar Adapter',
+                item_variant: i.inner_diameter_mm + 'x' + i.outer_diameter_mm + 'x' + i.height_mm,
+                quantity: i.quantity
+              };
+            });
+            gtag('event', 'begin_checkout', { currency: 'CHF', items: ga_items });
           }
           var error_el = self.querySelector('#cart-checkout-error');
           checkout_btn.disabled = true;
