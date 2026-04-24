@@ -54,7 +54,17 @@
       var path = (window.location.pathname || '');
       if (/\/order-confirmed(\/|$)/.test(path)) {
         if (typeof gtag === 'function') {
-          gtag('event', 'purchase', { event_category: 'ecommerce' });
+          var ga_items = [];
+          try {
+            ga_items = JSON.parse(localStorage.getItem(CART_KEY) || '[]').map(function (i) {
+              return {
+                item_name: 'Barbell Collar Adapter',
+                item_variant: i.inner_diameter_mm + 'x' + i.outer_diameter_mm + 'x' + i.height_mm,
+                quantity: i.quantity
+              };
+            });
+          } catch (e) {}
+          gtag('event', 'purchase', { currency: 'CHF', items: ga_items });
         }
         try {
           localStorage.setItem(CART_KEY, JSON.stringify([]));
