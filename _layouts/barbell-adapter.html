@@ -14,4 +14,13 @@ layout: default
 
 {{ content }}
 
+<script>
+  if (typeof gtag === 'function') {
+    gtag('event', 'view_item', {
+      event_category: 'ecommerce',
+      event_label: document.title
+    });
+  }
+</script>
+
 <div class="snackbar" id="snackbar"></div>
