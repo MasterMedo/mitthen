@@ -423,6 +423,8 @@
         inner_diameter_mm: state.inner_diameter_mm,
         outer_diameter_mm: CONFIG.outer_diameter_mm,
         height_mm: state.height_mm,
+        color: state.color,
+        material: state.material,
         quantity: units
       });
       try {
@@ -744,6 +746,8 @@
           inner_diameter_mm: item.inner_diameter_mm,
           outer_diameter_mm: item.outer_diameter_mm,
           height_mm:         item.height_mm,
+          color:             item.color || state.color,
+          material:          item.material || state.material,
           quantity:          item.quantity
         });
         try {
