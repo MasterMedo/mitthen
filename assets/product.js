@@ -390,6 +390,7 @@
       var src_list = (this.getAttribute('images') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
       if (src_list.length === 0) return;
 
+      var alt_text = (this.getAttribute('alt') || '').replace(/"/g, '&quot;');
       var index = 0;
       var self = this;
 
@@ -403,7 +404,7 @@
         var priority_attr = is_active ? ' fetchpriority="high"' : '';
         return '<picture>' +
             '<source type="image/webp" srcset="/assets/img/' + src + '-520.webp 1x, /assets/img/' + src + '-1040.webp 2x">' +
-            '<img class="gallery-media" src="/assets/img/' + src + '-520.jpg" srcset="/assets/img/' + src + '-520.jpg 1x, /assets/img/' + src + '-1040.jpg 2x" alt="" width="520" height="520" decoding="async" loading="' + loading_attr + '"' + priority_attr + '>' +
+            '<img class="gallery-media" src="/assets/img/' + src + '-520.jpg" srcset="/assets/img/' + src + '-520.jpg 1x, /assets/img/' + src + '-1040.jpg 2x" alt="' + alt_text + '" width="520" height="520" decoding="async" loading="' + loading_attr + '"' + priority_attr + '>' +
           '</picture>';
       }
 

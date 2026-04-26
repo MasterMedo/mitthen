@@ -1,10 +1,12 @@
 ---
 layout: default
+seo_title: "Barbell Adapters and Lifting Gear"
+description: "Mitthen makes universal barbell adapters that fit 2 inch Olympic weight plates onto 1 inch sleeves on dumbbells, barbells, and loading pins."
 ---
 
 <div class="intro">
   <h1>Mitthen</h1>
-  <p>Gear for people who lift.</p>
+  <p>Barbell adapters and gear for people who lift.</p>
 </div>
 
 <div class="products">
@@ -13,12 +15,12 @@ layout: default
     <div class="product-card-thumb">
       <picture>
         <source type="image/webp" srcset="{{ '/assets/img/adapter-144.webp' | relative_url }}">
-        <img src="{{ '/assets/img/adapter-144.jpg' | relative_url }}" alt="Barbell Collar Adapter" width="72" height="72" decoding="async">
+        <img src="{{ '/assets/img/adapter-144.jpg' | relative_url }}" alt="1 inch to 2 inch barbell adapter for Olympic weight plates" width="72" height="72" decoding="async">
       </picture>
     </div>
     <div class="product-card-info">
-      <div class="product-card-title">Barbell Collar 1&Prime; to 2&Prime; Adapter</div>
-      <div class="product-card-sub">Fit Olympic plates on a 1 inch barbell / dumbbell / loading pin</div>
+      <div class="product-card-title">1&Prime; to 2&Prime; Barbell Adapter</div>
+      <div class="product-card-sub">Universal weight plate adapter for dumbbells, barbells, and loading pins. Fits Olympic plates on 1 inch sleeves.</div>
     </div>
   </a>
 </div>
