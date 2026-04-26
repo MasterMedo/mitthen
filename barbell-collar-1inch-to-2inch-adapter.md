@@ -25,6 +25,8 @@ You need one weight plate adapter per sleeve, so a pair works for dumbbells and 
   <inner-diameter-picker></inner-diameter-picker>
   <outer-diameter-display></outer-diameter-display>
   <height-picker></height-picker>
+  <color-picker></color-picker>
+  <material-picker></material-picker>
   <quantity-picker></quantity-picker>
 </div>
 

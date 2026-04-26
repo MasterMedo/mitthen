@@ -17,7 +17,9 @@
     height_mm: CONFIG.default_height_mm,
     height_display: CONFIG.default_height_mm + 'mm',
     quantity: 'single',
-    unit: 'mm'
+    unit: 'mm',
+    color: 'white',
+    material: 'PLA'
   };
 
   function mm_to_in(mm) {
@@ -307,6 +309,82 @@
     }
   });
 
+  customElements.define('color-picker', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      var colors = [
+        { value: 'white', label: 'White' },
+        { value: 'red', label: 'Red' },
+        { value: 'blue', label: 'Blue' },
+        { value: 'green', label: 'Green' },
+        { value: 'black', label: 'Black' }
+      ];
+
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Color</div>' +
+          '<div class="variant-options" id="color-options">' +
+            colors.map(function(c) {
+              return '<button class="variant-btn' + (state.color === c.value ? ' active' : '') + '" data-value="' + c.value + '">' + c.label + '</button>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+
+      this.querySelector('#color-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.color = clicked.dataset.value;
+        notify_price_elements();
+      }.bind(this));
+    }
+
+    refresh() {
+      this._render();
+    }
+  });
+
+  customElements.define('material-picker', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      var materials = [
+        { value: 'PLA', label: 'PLA' },
+        { value: 'PETG', label: 'PETG' },
+        { value: 'TPU95', label: 'TPU95' }
+      ];
+
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Material</div>' +
+          '<div class="variant-options" id="material-options">' +
+            materials.map(function(m) {
+              return '<button class="variant-btn' + (state.material === m.value ? ' active' : '') + '" data-value="' + m.value + '">' + m.label + '</button>';
+            }).join('') +
+          '</div>' +
+        </div>';
+
+      this.querySelector('#material-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.material = clicked.dataset.value;
+        notify_price_elements();
+      }.bind(this));
+    }
+
+    refresh() {
+      this._render();
+    }
+  });
+
   customElements.define('price-display', class extends HTMLElement {
     connectedCallback() {
       this.innerHTML = '<div class="buy-wrap"><div class="product-price" id="product-price">CHF &mdash;</div></div>';
@@ -361,7 +439,9 @@
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
           quantity: state.quantity === 'pair' ? 2 : 1,
-          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.outer_diameter_display + ' OD, ' + state.height_display + ' h'
+          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.outer_diameter_display + ' OD, ' + state.height_display + ' h, ' + state.color + ', ' + state.material,
+          color: state.color,
+          material: state.material
         }];
 
         try {
@@ -476,7 +556,9 @@
           quantity:               state.quantity === 'pair' ? 2 : 1,
           inner_diameter_display: state.inner_diameter_display,
           outer_diameter_display: state.outer_diameter_display,
-          height_display:         state.height_display
+          height_display:         state.height_display,
+          color:                  state.color,
+          material:               state.material
         };
         cart_add(item);
         if (typeof gtag === 'function') {
@@ -527,7 +609,7 @@
             var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
             var od_label = item.outer_diameter_display || format_id(item.outer_diameter_mm);
             var h_label  = item.height_display         || format_height(item.height_mm);
-            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 qty\u00a0' + item.quantity;
+            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 ' + (item.color || state.color) + '\u00b7 ' + (item.material || state.material) + '\u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
