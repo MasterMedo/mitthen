@@ -598,6 +598,8 @@
           });
         }
         show_snackbar('Added to cart');
+        var drawer = document.querySelector('cart-drawer');
+        if (drawer) drawer.open();
       });
     }
   });
@@ -623,6 +625,13 @@
     _render() {
       var self = this;
       var items = cart_load();
+
+      var prev_prices = {};
+      this.querySelectorAll('.cart-item-price').forEach(function (el) {
+        prev_prices[el.dataset.index] = el.textContent;
+      });
+      var prev_total_el = this.querySelector('#cart-total');
+      var prev_total = prev_total_el ? prev_total_el.textContent : '';
 
       var items_html;
       if (items.length === 0) {
@@ -669,6 +678,18 @@
           '<div class="cart-body">' + items_html + '</div>' +
           footer_html +
         '</div>';
+
+      // Restore prior price text so the column doesn't flash to em-dash on
+      // re-renders (e.g. quantity tweaks). _fetch_prices below overwrites
+      // with fresh values once the worker responds.
+      this.querySelectorAll('.cart-item-price').forEach(function (el) {
+        var prev = prev_prices[el.dataset.index];
+        if (prev && prev !== 'CHF —') el.textContent = prev;
+      });
+      var total_el = this.querySelector('#cart-total');
+      if (total_el && prev_total && prev_total !== 'Total: CHF —') {
+        total_el.textContent = prev_total;
+      }
 
       // Wire close
       this.querySelector('.cart-backdrop').addEventListener('click', function () { self.close(); });
