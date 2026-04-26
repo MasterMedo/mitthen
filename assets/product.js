@@ -350,6 +350,16 @@
         '<div class="checkout-error" id="checkout-error"></div>';
 
       this.querySelector('#checkout-btn').addEventListener('click', async function () {
+        if (typeof gtag === 'function') {
+          gtag('event', 'begin_checkout', {
+            currency: 'CHF',
+            items: [{
+              item_name: 'Barbell Collar Adapter',
+              item_variant: state.inner_diameter_mm + 'x' + CONFIG.outer_diameter_mm + 'x' + state.height_mm,
+              quantity: state.quantity === 'pair' ? 2 : 1
+            }]
+          });
+        }
         var btn = this.querySelector('#checkout-btn');
         var error_element = this.querySelector('#checkout-error');
         btn.disabled = true;
@@ -390,28 +400,40 @@
       var src_list = (this.getAttribute('images') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
       if (src_list.length === 0) return;
 
+      var alt_text = (this.getAttribute('alt') || '').replace(/"/g, '&quot;');
       var index = 0;
       var self = this;
 
       function is_video(src) { return /\.(mp4|webm)$/i.test(src); }
 
-      function media_tag(src) {
+      function media_tag(src, is_active) {
         if (is_video(src)) {
-          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline></video>';
+          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline width="520" height="520"></video>';
         }
-        return '<img class="gallery-media" src="/assets/' + src + '" alt="">';
+        var loading_attr = is_active ? 'eager' : 'lazy';
+        var priority_attr = is_active ? ' fetchpriority="high"' : '';
+        return '<picture>' +
+            '<source type="image/webp" srcset="/assets/img/' + src + '-520.webp 1x, /assets/img/' + src + '-1040.webp 2x">' +
+            '<img class="gallery-media" src="/assets/img/' + src + '-520.jpg" srcset="/assets/img/' + src + '-520.jpg 1x, /assets/img/' + src + '-1040.jpg 2x" alt="' + alt_text + '" width="520" height="520" decoding="async" loading="' + loading_attr + '"' + priority_attr + '>' +
+          '</picture>';
+      }
+
+      function thumb_inner(src) {
+        if (is_video(src)) {
+          return '<video src="/assets/' + src + '" muted width="52" height="52"></video>';
+        }
+        return '<picture>' +
+            '<source type="image/webp" srcset="/assets/img/' + src + '-104.webp">' +
+            '<img src="/assets/img/' + src + '-104.jpg" alt="" width="52" height="52" loading="lazy" decoding="async">' +
+          '</picture>';
       }
 
       function thumbs_html() {
         return src_list.map(function (src, i) {
           var cls = 'gallery-thumb' + (i === index ? ' active' : '');
-          if (is_video(src)) {
-            return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to video ' + (i + 1) + '">' +
-              '<video src="/assets/' + src + '" muted></video>' +
-            '</button>';
-          }
-          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to image ' + (i + 1) + '">' +
-            '<img src="/assets/' + src + '" alt="">' +
+          var label = is_video(src) ? 'video' : 'image';
+          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to ' + label + ' ' + (i + 1) + '">' +
+            thumb_inner(src) +
           '</button>';
         }).join('');
       }
@@ -426,7 +448,7 @@
           : '';
         self.innerHTML =
           '<div class="gallery-wrap">' +
-            media_tag(src_list[index]) +
+            media_tag(src_list[index], true) +
             nav +
           '</div>';
 
@@ -467,6 +489,16 @@
           height_display:         state.height_display
         };
         cart_add(item);
+        if (typeof gtag === 'function') {
+          gtag('event', 'add_to_cart', {
+            currency: 'CHF',
+            items: [{
+              item_name: 'Barbell Collar Adapter',
+              item_variant: item.inner_diameter_mm + 'x' + item.outer_diameter_mm + 'x' + item.height_mm,
+              quantity: item.quantity
+            }]
+          });
+        }
         show_snackbar('Added to cart');
         show_post_add_confirm();
       });
@@ -553,6 +585,16 @@
       var checkout_btn = this.querySelector('#cart-checkout-btn');
       if (checkout_btn) {
         checkout_btn.addEventListener('click', async function () {
+          if (typeof gtag === 'function') {
+            var ga_items = cart_load().map(function (i) {
+              return {
+                item_name: 'Barbell Collar Adapter',
+                item_variant: i.inner_diameter_mm + 'x' + i.outer_diameter_mm + 'x' + i.height_mm,
+                quantity: i.quantity
+              };
+            });
+            gtag('event', 'begin_checkout', { currency: 'CHF', items: ga_items });
+          }
           var error_el = self.querySelector('#cart-checkout-error');
           checkout_btn.disabled = true;
           checkout_btn.textContent = 'Processing...';
@@ -630,13 +672,4 @@
     }
   });
 
-  // Wrap pickers in the variant-selector div once DOM is ready
-  document.addEventListener('DOMContentLoaded', function () {
-    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, outer-diameter-display, height-picker, quantity-picker');
-    if (pickers.length === 0) return;
-    var wrapper = document.createElement('div');
-    wrapper.className = 'variant-selector';
-    pickers[0].parentNode.insertBefore(wrapper, pickers[0]);
-    pickers.forEach(function (el) { wrapper.appendChild(el); });
-  });
 })();
