@@ -61,7 +61,11 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-QWQ9Z1NK24');
+    var ga_config = {};
+    if (window.location.hostname !== 'mitthen.com') {
+      ga_config.debug_mode = true;
+    }
+    gtag('config', 'G-QWQ9Z1NK24', ga_config);
   </script>
 </head>
 <body>
