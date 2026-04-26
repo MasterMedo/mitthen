@@ -12,6 +12,7 @@
   {% assign page_description = page.description | default: site.description %}
   <meta name="description" content="{{ page_description }}">
   <link rel="canonical" href="{{ page.url | replace: '/index.html', '/' | absolute_url }}">
+  <meta name="theme-color" content="{{ site.theme_color }}">
 
   <meta property="og:site_name" content="{{ site.title }}">
   <meta property="og:type" content="{% if page.product %}product{% else %}website{% endif %}">
@@ -33,10 +34,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
   <link rel="icon" href="{{ '/assets/img/logo-80.png' | relative_url }}" type="image/png">
+  <link rel="apple-touch-icon" href="{{ '/assets/img/logo-160.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
   {% if page.preload_image %}
   <link rel="preload" as="image" type="image/webp" imagesrcset="{{ page.preload_image | append: '-520.webp' | prepend: '/assets/img/' | relative_url }} 1x, {{ page.preload_image | append: '-1040.webp' | prepend: '/assets/img/' | relative_url }} 2x">
   {% endif %}
+  {% if page.url == '/' %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -46,6 +49,15 @@
     "logo": "{{ '/assets/img/logo-160.png' | absolute_url }}"
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "{{ site.title }}",
+    "url": "{{ site.url }}"
+  }
+  </script>
+  {% endif %}
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QWQ9Z1NK24"></script>
   <script>
