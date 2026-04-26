@@ -607,11 +607,19 @@ cart-drawer.is-open .cart-panel { transform: translateX(0); }
 
 .cart-item {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: 0.5rem 0.75rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border);
+}
+
+.cart-item-svg {
+  width: 40px;
+  height: 48px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .cart-item-spec { font-size: 0.875rem; }

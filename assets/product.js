@@ -44,6 +44,28 @@
       : mm + 'mm';
   }
 
+  var COLOR_MAP = {
+    white:  '#F5F5F5',
+    red:    '#E53935',
+    blue:   '#1E88E5',
+    green:  '#43A047',
+    black:  '#212121'
+  };
+
+  function cylinder_svg(color, material) {
+    var fill = COLOR_MAP[color] || '#999999';
+    var label = material || 'PLA';
+    var textColor = (color === 'white') ? '#333' : '#fff';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48">' +
+      '<ellipse cx="20" cy="38" rx="14" ry="5" fill="#aaa"/>' +
+      '<rect x="6" y="8" width="28" height="30" fill="' + fill + '"/>' +
+      '<ellipse cx="20" cy="8" rx="14" ry="5" fill="' + fill + '" stroke="#aaa" stroke-width="1"/>' +
+      '<rect x="6" y="8" width="28" height="6" fill="rgba(255,255,255,0.15)"/>' +
+      '<text x="20" y="26" font-family="sans-serif" font-size="9" font-weight="bold" fill="' + textColor + '" text-anchor="middle">' + label + '</text>' +
+    '</svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
 
 
   var snackbar_timeout = null;
@@ -609,8 +631,12 @@
             var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
             var od_label = item.outer_diameter_display || format_id(item.outer_diameter_mm);
             var h_label  = item.height_display         || format_height(item.height_mm);
-            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 ' + (item.color || state.color) + '\u00b7 ' + (item.material || state.material) + '\u00b7 qty\u00a0' + item.quantity;
+            var itemColor = item.color || state.color;
+            var itemMaterial = item.material || state.material;
+            var svgPreview = '<img class="cart-item-svg" src="' + cylinder_svg(itemColor, itemMaterial) + '" alt="' + itemColor + ' ' + itemMaterial + '">';
+            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 ' + itemColor + ' \u00b7 ' + itemMaterial + ' \u00b7 qty\u00a0' + item.quantity;
             return '<li class="cart-item" data-index="' + index + '">' +
+              svgPreview +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
               '<button class="cart-item-remove" data-index="' + index + '" aria-label="Remove item">&times;</button>' +
