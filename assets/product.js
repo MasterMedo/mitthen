@@ -352,14 +352,15 @@
           '<div class="variant-label">Color</div>' +
           '<div class="variant-options" id="color-options">' +
             colors.map(function(c) {
-              return '<button class="variant-btn' + (state.color === c.value ? ' active' : '') + '" data-value="' + c.value + '">' + c.label + '</button>';
+              var unavailable = (c.value !== 'white' && c.value !== 'black') ? ' unavailable' : '';
+              return '<button class="variant-btn' + (state.color === c.value ? ' active' : '') + unavailable + '" data-value="' + c.value + '">' + c.label + '</button>';
             }).join('') +
           '</div>' +
         '</div>';
 
       this.querySelector('#color-options').addEventListener('click', function (event) {
         var clicked = event.target.closest('.variant-btn');
-        if (!clicked) return;
+        if (!clicked || clicked.classList.contains('unavailable')) return;
         this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
         clicked.classList.add('active');
         state.color = clicked.dataset.value;
@@ -389,14 +390,15 @@
           '<div class="variant-label">Material</div>' +
           '<div class="variant-options" id="material-options">' +
             materials.map(function(m) {
-              return '<button class="variant-btn' + (state.material === m.value ? ' active' : '') + '" data-value="' + m.value + '">' + m.label + '</button>';
+              var unavailable = (m.value !== 'PLA' && m.value !== 'PETG') ? ' unavailable' : '';
+              return '<button class="variant-btn' + (state.material === m.value ? ' active' : '') + unavailable + '" data-value="' + m.value + '">' + m.label + '</button>';
             }).join('') +
           '</div>' +
         '</div>';
 
       this.querySelector('#material-options').addEventListener('click', function (event) {
         var clicked = event.target.closest('.variant-btn');
-        if (!clicked) return;
+        if (!clicked || clicked.classList.contains('unavailable')) return;
         this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
         clicked.classList.add('active');
         state.material = clicked.dataset.value;
