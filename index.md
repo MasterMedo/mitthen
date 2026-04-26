@@ -5,7 +5,7 @@ description: "Mitthen makes universal barbell adapters that fit 2 inch Olympic w
 ---
 
 <div class="intro">
-  <h1>Mitthen</h1>
+  <h1>Mitthen - Home Gym Accessories</h1>
   <p>Barbell adapters and gear for people who lift.</p>
 </div>
 
