@@ -31,7 +31,8 @@ layout: default
     "@type": "AggregateOffer",
     "priceCurrency": "{{ page.product.currency | default: 'CHF' }}",
     "lowPrice": "{{ page.product.low_price }}",
-    "highPrice": "{{ page.product.high_price }}",
+    "highPrice": "{{ page.product.high_price }}",{% if page.product.offer_count %}
+    "offerCount": "{{ page.product.offer_count }}",{% endif %}
     "availability": "https://schema.org/InStock",
     "url": "{{ page.url | absolute_url }}"
   }{% endif %}

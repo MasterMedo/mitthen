@@ -10,6 +10,7 @@ product:
   currency: CHF
   low_price: "12.25"
   high_price: "21.22"
+  offer_count: "3360"
 ---
 
 <product-gallery images="adapter, img-6587, img-detail" alt="1 inch to 2 inch barbell adapter for Olympic weight plates"></product-gallery>
