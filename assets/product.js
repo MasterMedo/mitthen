@@ -97,7 +97,9 @@
     var match = items.find(function (i) {
       return i.inner_diameter_mm === item.inner_diameter_mm &&
              i.outer_diameter_mm === item.outer_diameter_mm &&
-             i.height_mm         === item.height_mm;
+             i.height_mm         === item.height_mm &&
+             (i.color === undefined || i.color === item.color) &&
+             (i.material === undefined || i.material === item.material);
     });
     if (match) {
       match.quantity += item.quantity;
