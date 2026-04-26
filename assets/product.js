@@ -395,23 +395,34 @@
 
       function is_video(src) { return /\.(mp4|webm)$/i.test(src); }
 
-      function media_tag(src) {
+      function media_tag(src, is_active) {
         if (is_video(src)) {
-          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline></video>';
+          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline width="520" height="520"></video>';
         }
-        return '<img class="gallery-media" src="/assets/' + src + '" alt="">';
+        var loading_attr = is_active ? 'eager' : 'lazy';
+        var priority_attr = is_active ? ' fetchpriority="high"' : '';
+        return '<picture>' +
+            '<source type="image/webp" srcset="/assets/img/' + src + '-520.webp 1x, /assets/img/' + src + '-1040.webp 2x">' +
+            '<img class="gallery-media" src="/assets/img/' + src + '-520.jpg" srcset="/assets/img/' + src + '-520.jpg 1x, /assets/img/' + src + '-1040.jpg 2x" alt="" width="520" height="520" decoding="async" loading="' + loading_attr + '"' + priority_attr + '>' +
+          '</picture>';
+      }
+
+      function thumb_inner(src) {
+        if (is_video(src)) {
+          return '<video src="/assets/' + src + '" muted width="52" height="52"></video>';
+        }
+        return '<picture>' +
+            '<source type="image/webp" srcset="/assets/img/' + src + '-104.webp">' +
+            '<img src="/assets/img/' + src + '-104.jpg" alt="" width="52" height="52" loading="lazy" decoding="async">' +
+          '</picture>';
       }
 
       function thumbs_html() {
         return src_list.map(function (src, i) {
           var cls = 'gallery-thumb' + (i === index ? ' active' : '');
-          if (is_video(src)) {
-            return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to video ' + (i + 1) + '">' +
-              '<video src="/assets/' + src + '" muted></video>' +
-            '</button>';
-          }
-          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to image ' + (i + 1) + '">' +
-            '<img src="/assets/' + src + '" alt="">' +
+          var label = is_video(src) ? 'video' : 'image';
+          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to ' + label + ' ' + (i + 1) + '">' +
+            thumb_inner(src) +
           '</button>';
         }).join('');
       }
@@ -426,7 +437,7 @@
           : '';
         self.innerHTML =
           '<div class="gallery-wrap">' +
-            media_tag(src_list[index]) +
+            media_tag(src_list[index], true) +
             nav +
           '</div>';
 
@@ -647,13 +658,4 @@
     }
   });
 
-  // Wrap pickers in the variant-selector div once DOM is ready
-  document.addEventListener('DOMContentLoaded', function () {
-    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, outer-diameter-display, height-picker, quantity-picker');
-    if (pickers.length === 0) return;
-    var wrapper = document.createElement('div');
-    wrapper.className = 'variant-selector';
-    pickers[0].parentNode.insertBefore(wrapper, pickers[0]);
-    pickers.forEach(function (el) { wrapper.appendChild(el); });
-  });
 })();
