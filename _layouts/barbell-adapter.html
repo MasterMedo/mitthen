@@ -14,4 +14,39 @@ layout: default
 
 {{ content }}
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ page.product.name }}",
+  "description": "{{ page.description }}",
+  "image": [
+    "{{ '/assets/img/adapter-1040.jpg' | absolute_url }}",
+    "{{ '/assets/img/img-6587-1040.jpg' | absolute_url }}",
+    "{{ '/assets/img/img-detail-1040.jpg' | absolute_url }}"
+  ],
+  "sku": "{{ page.product.sku }}",
+  "brand": { "@type": "Brand", "name": "{{ site.title }}" }{% if page.product.low_price %},
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "{{ page.product.currency | default: 'CHF' }}",
+    "lowPrice": "{{ page.product.low_price }}",
+    "highPrice": "{{ page.product.high_price }}",
+    "availability": "https://schema.org/InStock",
+    "url": "{{ page.url | absolute_url }}"
+  }{% endif %}
+}
+</script>
+
+<script>
+  if (typeof gtag === 'function') {
+    gtag('event', 'view_item', {
+      currency: 'CHF',
+      items: [{
+        item_name: document.title
+      }]
+    });
+  }
+</script>
+
 <div class="snackbar" id="snackbar"></div>

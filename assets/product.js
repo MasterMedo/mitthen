@@ -17,7 +17,9 @@
     height_mm: CONFIG.default_height_mm,
     height_display: CONFIG.default_height_mm + 'mm',
     quantity: 'single',
-    unit: 'mm'
+    unit: 'mm',
+    color: 'white',
+    material: 'PLA'
   };
 
   function mm_to_in(mm) {
@@ -40,6 +42,28 @@
     return state.unit === 'in'
       ? (mm / 25.4).toFixed(2) + '\u2033'
       : mm + 'mm';
+  }
+
+  var COLOR_MAP = {
+    white:  '#F5F5F5',
+    red:    '#E53935',
+    blue:   '#1E88E5',
+    green:  '#43A047',
+    black:  '#212121'
+  };
+
+  function cylinder_svg(color, material) {
+    var fill = COLOR_MAP[color] || '#999999';
+    var label = material || 'PLA';
+    var textColor = (color === 'white') ? '#333' : '#fff';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48">' +
+      '<ellipse cx="20" cy="38" rx="14" ry="5" fill="#aaa"/>' +
+      '<rect x="6" y="8" width="28" height="30" fill="' + fill + '"/>' +
+      '<ellipse cx="20" cy="8" rx="14" ry="5" fill="' + fill + '" stroke="#aaa" stroke-width="1"/>' +
+      '<rect x="6" y="8" width="28" height="6" fill="rgba(255,255,255,0.15)"/>' +
+      '<text x="20" y="26" font-family="sans-serif" font-size="9" font-weight="bold" fill="' + textColor + '" text-anchor="middle">' + label + '</text>' +
+    '</svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
 
@@ -73,7 +97,9 @@
     var match = items.find(function (i) {
       return i.inner_diameter_mm === item.inner_diameter_mm &&
              i.outer_diameter_mm === item.outer_diameter_mm &&
-             i.height_mm         === item.height_mm;
+             i.height_mm         === item.height_mm &&
+             (i.color === undefined || i.color === item.color) &&
+             (i.material === undefined || i.material === item.material);
     });
     if (match) {
       match.quantity += item.quantity;
@@ -307,6 +333,82 @@
     }
   });
 
+  customElements.define('color-picker', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      var colors = [
+        { value: 'white', label: 'White' },
+        { value: 'red', label: 'Red' },
+        { value: 'blue', label: 'Blue' },
+        { value: 'green', label: 'Green' },
+        { value: 'black', label: 'Black' }
+      ];
+
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Color</div>' +
+          '<div class="variant-options" id="color-options">' +
+            colors.map(function(c) {
+              return '<button class="variant-btn' + (state.color === c.value ? ' active' : '') + '" data-value="' + c.value + '">' + c.label + '</button>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+
+      this.querySelector('#color-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.color = clicked.dataset.value;
+        notify_price_elements();
+      }.bind(this));
+    }
+
+    refresh() {
+      this._render();
+    }
+  });
+
+  customElements.define('material-picker', class extends HTMLElement {
+    connectedCallback() {
+      this._render();
+    }
+
+    _render() {
+      var materials = [
+        { value: 'PLA', label: 'PLA' },
+        { value: 'PETG', label: 'PETG' },
+        { value: 'TPU95', label: 'TPU95' }
+      ];
+
+      this.innerHTML =
+        '<div class="variant-group">' +
+          '<div class="variant-label">Material</div>' +
+          '<div class="variant-options" id="material-options">' +
+            materials.map(function(m) {
+              return '<button class="variant-btn' + (state.material === m.value ? ' active' : '') + '" data-value="' + m.value + '">' + m.label + '</button>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+
+      this.querySelector('#material-options').addEventListener('click', function (event) {
+        var clicked = event.target.closest('.variant-btn');
+        if (!clicked) return;
+        this.querySelectorAll('.variant-btn').forEach(function (btn) { btn.classList.remove('active'); });
+        clicked.classList.add('active');
+        state.material = clicked.dataset.value;
+        notify_price_elements();
+      }.bind(this));
+    }
+
+    refresh() {
+      this._render();
+    }
+  });
+
   customElements.define('price-display', class extends HTMLElement {
     connectedCallback() {
       this.innerHTML = '<div class="buy-wrap"><div class="product-price" id="product-price">CHF &mdash;</div></div>';
@@ -321,6 +423,8 @@
         inner_diameter_mm: state.inner_diameter_mm,
         outer_diameter_mm: CONFIG.outer_diameter_mm,
         height_mm: state.height_mm,
+        color: state.color,
+        material: state.material,
         quantity: units
       });
       try {
@@ -340,6 +444,16 @@
         '<div class="checkout-error" id="checkout-error"></div>';
 
       this.querySelector('#checkout-btn').addEventListener('click', async function () {
+        if (typeof gtag === 'function') {
+          gtag('event', 'begin_checkout', {
+            currency: 'CHF',
+            items: [{
+              item_name: 'Barbell Collar Adapter',
+              item_variant: state.inner_diameter_mm + 'x' + CONFIG.outer_diameter_mm + 'x' + state.height_mm,
+              quantity: state.quantity === 'pair' ? 2 : 1
+            }]
+          });
+        }
         var btn = this.querySelector('#checkout-btn');
         var error_element = this.querySelector('#checkout-error');
         btn.disabled = true;
@@ -351,7 +465,9 @@
           outer_diameter_mm: CONFIG.outer_diameter_mm,
           height_mm: state.height_mm,
           quantity: state.quantity === 'pair' ? 2 : 1,
-          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.outer_diameter_display + ' OD, ' + state.height_display + ' h'
+          display_name: 'Barbell Collar Adapter \u2014 ' + state.inner_diameter_display + ' ID, ' + state.outer_diameter_display + ' OD, ' + state.height_display + ' h, ' + state.color + ', ' + state.material,
+          color: state.color,
+          material: state.material
         }];
 
         try {
@@ -380,28 +496,40 @@
       var src_list = (this.getAttribute('images') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
       if (src_list.length === 0) return;
 
+      var alt_text = (this.getAttribute('alt') || '').replace(/"/g, '&quot;');
       var index = 0;
       var self = this;
 
       function is_video(src) { return /\.(mp4|webm)$/i.test(src); }
 
-      function media_tag(src) {
+      function media_tag(src, is_active) {
         if (is_video(src)) {
-          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline></video>';
+          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline width="520" height="520"></video>';
         }
-        return '<img class="gallery-media" src="/assets/' + src + '" alt="">';
+        var loading_attr = is_active ? 'eager' : 'lazy';
+        var priority_attr = is_active ? ' fetchpriority="high"' : '';
+        return '<picture>' +
+            '<source type="image/webp" srcset="/assets/img/' + src + '-520.webp 1x, /assets/img/' + src + '-1040.webp 2x">' +
+            '<img class="gallery-media" src="/assets/img/' + src + '-520.jpg" srcset="/assets/img/' + src + '-520.jpg 1x, /assets/img/' + src + '-1040.jpg 2x" alt="' + alt_text + '" width="520" height="520" decoding="async" loading="' + loading_attr + '"' + priority_attr + '>' +
+          '</picture>';
+      }
+
+      function thumb_inner(src) {
+        if (is_video(src)) {
+          return '<video src="/assets/' + src + '" muted width="52" height="52"></video>';
+        }
+        return '<picture>' +
+            '<source type="image/webp" srcset="/assets/img/' + src + '-104.webp">' +
+            '<img src="/assets/img/' + src + '-104.jpg" alt="" width="52" height="52" loading="lazy" decoding="async">' +
+          '</picture>';
       }
 
       function thumbs_html() {
         return src_list.map(function (src, i) {
           var cls = 'gallery-thumb' + (i === index ? ' active' : '');
-          if (is_video(src)) {
-            return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to video ' + (i + 1) + '">' +
-              '<video src="/assets/' + src + '" muted></video>' +
-            '</button>';
-          }
-          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to image ' + (i + 1) + '">' +
-            '<img src="/assets/' + src + '" alt="">' +
+          var label = is_video(src) ? 'video' : 'image';
+          return '<button class="' + cls + '" data-i="' + i + '" aria-label="Go to ' + label + ' ' + (i + 1) + '">' +
+            thumb_inner(src) +
           '</button>';
         }).join('');
       }
@@ -416,7 +544,7 @@
           : '';
         self.innerHTML =
           '<div class="gallery-wrap">' +
-            media_tag(src_list[index]) +
+            media_tag(src_list[index], true) +
             nav +
           '</div>';
 
@@ -454,9 +582,21 @@
           quantity:               state.quantity === 'pair' ? 2 : 1,
           inner_diameter_display: state.inner_diameter_display,
           outer_diameter_display: state.outer_diameter_display,
-          height_display:         state.height_display
+          height_display:         state.height_display,
+          color:                  state.color,
+          material:               state.material
         };
         cart_add(item);
+        if (typeof gtag === 'function') {
+          gtag('event', 'add_to_cart', {
+            currency: 'CHF',
+            items: [{
+              item_name: 'Barbell Collar Adapter',
+              item_variant: item.inner_diameter_mm + 'x' + item.outer_diameter_mm + 'x' + item.height_mm,
+              quantity: item.quantity
+            }]
+          });
+        }
         show_snackbar('Added to cart');
       });
     }
@@ -493,8 +633,12 @@
             var id_label = item.inner_diameter_display || format_id(item.inner_diameter_mm);
             var od_label = item.outer_diameter_display || format_id(item.outer_diameter_mm);
             var h_label  = item.height_display         || format_height(item.height_mm);
-            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall';
+            var itemColor = item.color || state.color;
+            var itemMaterial = item.material || state.material;
+            var svgPreview = '<img class="cart-item-svg" src="' + cylinder_svg(itemColor, itemMaterial) + '" alt="' + itemColor + ' ' + itemMaterial + '">';
+            var spec = id_label + '\u200a ID \u00b7 ' + od_label + ' OD \u00b7 ' + h_label + ' tall \u00b7 ' + itemColor + ' \u00b7 ' + itemMaterial;
             return '<li class="cart-item" data-index="' + index + '">' +
+              svgPreview +
               '<div class="cart-item-spec">' + spec + '</div>' +
               '<div class="cart-item-qty-wrap">' +
                 '<label class="cart-qty-label">Qty</label>' +
@@ -564,6 +708,16 @@
       var checkout_btn = this.querySelector('#cart-checkout-btn');
       if (checkout_btn) {
         checkout_btn.addEventListener('click', async function () {
+          if (typeof gtag === 'function') {
+            var ga_items = cart_load().map(function (i) {
+              return {
+                item_name: 'Barbell Collar Adapter',
+                item_variant: i.inner_diameter_mm + 'x' + i.outer_diameter_mm + 'x' + i.height_mm,
+                quantity: i.quantity
+              };
+            });
+            gtag('event', 'begin_checkout', { currency: 'CHF', items: ga_items });
+          }
           var error_el = self.querySelector('#cart-checkout-error');
           checkout_btn.disabled = true;
           checkout_btn.textContent = 'Processing...';
@@ -616,6 +770,8 @@
           inner_diameter_mm: item.inner_diameter_mm,
           outer_diameter_mm: item.outer_diameter_mm,
           height_mm:         item.height_mm,
+          color:             item.color || state.color,
+          material:          item.material || state.material,
           quantity:          item.quantity
         });
         try {
@@ -641,13 +797,4 @@
     }
   });
 
-  // Wrap pickers in the variant-selector div once DOM is ready
-  document.addEventListener('DOMContentLoaded', function () {
-    var pickers = document.querySelectorAll('unit-toggle, inner-diameter-picker, outer-diameter-display, height-picker, quantity-picker');
-    if (pickers.length === 0) return;
-    var wrapper = document.createElement('div');
-    wrapper.className = 'variant-selector';
-    pickers[0].parentNode.insertBefore(wrapper, pickers[0]);
-    pickers.forEach(function (el) { wrapper.appendChild(el); });
-  });
 })();
