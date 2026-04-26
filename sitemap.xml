@@ -1,0 +1,20 @@
+---
+layout: null
+permalink: /sitemap.xml
+sitemap:
+  exclude: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{% assign pages = site.pages | where_exp: "p", "p.sitemap.exclude != true" %}
+{% for page in pages %}
+{% assign ext = page.path | split: "." | last %}
+{% if ext == "md" or ext == "html" %}
+{% if page.name == "order-confirmed.md" %}{% continue %}{% endif %}
+  <url>
+    <loc>{{ page.url | replace: "/index.html", "/" | absolute_url }}</loc>
+    {% if page.last_modified_at %}<lastmod>{{ page.last_modified_at | date_to_xmlschema }}</lastmod>{% endif %}
+  </url>
+{% endif %}
+{% endfor %}
+</urlset>
