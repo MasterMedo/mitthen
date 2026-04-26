@@ -368,7 +368,7 @@
               return '<button class="variant-btn' + (state.material === m.value ? ' active' : '') + '" data-value="' + m.value + '">' + m.label + '</button>';
             }).join('') +
           '</div>' +
-        </div>';
+        '</div>';
 
       this.querySelector('#material-options').addEventListener('click', function (event) {
         var clicked = event.target.closest('.variant-btn');
