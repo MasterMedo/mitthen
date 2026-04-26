@@ -7,6 +7,9 @@ preload_image: adapter
 product:
   name: "1 inch to 2 inch Barbell Adapter"
   sku: "MTN-ADP-1TO2"
+  currency: CHF
+  low_price: "12.25"
+  high_price: "21.22"
 ---
 
 <product-gallery images="adapter, img-6587, img-detail" alt="1 inch to 2 inch barbell adapter for Olympic weight plates"></product-gallery>
