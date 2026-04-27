@@ -14,8 +14,8 @@ description: "Mitthen makes universal barbell adapters that fit 2 inch Olympic w
   <a href="{{ '/barbell-collar-1inch-to-2inch-adapter' | relative_url }}" class="product-card">
     <div class="product-card-thumb">
       <picture>
-        <source type="image/webp" srcset="{{ '/assets/img/adapter-144.webp' | relative_url }}">
-        <img src="{{ '/assets/img/adapter-144.jpg' | relative_url }}" alt="1 inch to 2 inch barbell adapter for Olympic weight plates" width="72" height="72" decoding="async">
+        <source type="image/webp" srcset="{{ '/assets/img/img-6894-144.webp' | relative_url }}">
+        <img src="{{ '/assets/img/img-6894-144.jpg' | relative_url }}" alt="1 inch to 2 inch barbell adapter for Olympic weight plates" width="72" height="72" decoding="async">
       </picture>
     </div>
     <div class="product-card-info">

@@ -501,10 +501,12 @@
       var self = this;
 
       function is_video(src) { return /\.(mp4|webm)$/i.test(src); }
+      function poster_base(src) { return src.replace(/\.(mp4|webm)$/i, ''); }
 
       function media_tag(src, is_active) {
         if (is_video(src)) {
-          return '<video class="gallery-media" src="/assets/' + src + '" autoplay muted loop playsinline width="520" height="520"></video>';
+          var base = poster_base(src);
+          return '<video class="gallery-media" src="/assets/img/' + src + '" poster="/assets/img/' + base + '-1040.jpg" autoplay muted loop playsinline preload="metadata" width="520" height="520"></video>';
         }
         var loading_attr = is_active ? 'eager' : 'lazy';
         var priority_attr = is_active ? ' fetchpriority="high"' : '';
@@ -515,12 +517,10 @@
       }
 
       function thumb_inner(src) {
-        if (is_video(src)) {
-          return '<video src="/assets/' + src + '" muted width="52" height="52"></video>';
-        }
+        var base = is_video(src) ? poster_base(src) : src;
         return '<picture>' +
-            '<source type="image/webp" srcset="/assets/img/' + src + '-104.webp">' +
-            '<img src="/assets/img/' + src + '-104.jpg" alt="" width="52" height="52" loading="lazy" decoding="async">' +
+            '<source type="image/webp" srcset="/assets/img/' + base + '-104.webp">' +
+            '<img src="/assets/img/' + base + '-104.jpg" alt="" width="52" height="52" loading="lazy" decoding="async">' +
           '</picture>';
       }
 
