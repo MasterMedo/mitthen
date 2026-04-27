@@ -628,6 +628,13 @@
       var self = this;
       var items = cart_load();
 
+      var prev_prices = {};
+      this.querySelectorAll('.cart-item-price').forEach(function (el) {
+        prev_prices[el.dataset.index] = el.textContent;
+      });
+      var prev_total_el = this.querySelector('#cart-total');
+      var prev_total = prev_total_el ? prev_total_el.textContent : '';
+
       var items_html;
       if (items.length === 0) {
         items_html = '<p class="cart-empty">Your cart is empty.</p>';
@@ -644,6 +651,10 @@
             return '<li class="cart-item" data-index="' + index + '">' +
               svgPreview +
               '<div class="cart-item-spec">' + spec + '</div>' +
+              '<div class="cart-item-qty-wrap">' +
+                '<label class="cart-qty-label">Qty</label>' +
+                '<input class="cart-qty-input" type="number" min="0" step="1" data-index="' + index + '" value="' + item.quantity + '">' +
+              '</div>' +
               '<div class="cart-item-price" data-index="' + index + '">CHF \u2014</div>' +
               '<button class="cart-item-remove" data-index="' + index + '" aria-label="Remove item">&times;</button>' +
             '</li>';
@@ -670,11 +681,45 @@
           footer_html +
         '</div>';
 
+      // Restore prior price text so the column doesn't flash to em-dash on
+      // re-renders (e.g. quantity tweaks). _fetch_prices below overwrites
+      // with fresh values once the worker responds.
+      this.querySelectorAll('.cart-item-price').forEach(function (el) {
+        var prev = prev_prices[el.dataset.index];
+        if (prev && prev !== 'CHF —') el.textContent = prev;
+      });
+      var total_el = this.querySelector('#cart-total');
+      if (total_el && prev_total && prev_total !== 'Total: CHF —') {
+        total_el.textContent = prev_total;
+      }
+
       // Wire close
       this.querySelector('.cart-backdrop').addEventListener('click', function () { self.close(); });
       this.querySelector('.cart-close').addEventListener('click', function () { self.close(); });
 
-      // Wire remove buttons
+      // Wire qty input
+      this.querySelectorAll('.cart-qty-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+          const idx = parseInt(input.dataset.index, 10);
+          let new_qty = parseInt(input.value, 10);
+          if (isNaN(new_qty)) new_qty = 0;
+          if (new_qty < 0) new_qty = 0;
+
+          const items = cart_load();
+          const item = items[idx];
+          if (!item) return;
+
+          if (new_qty === 0) {
+            cart_remove(idx);
+            return;
+          }
+
+          item.quantity = new_qty;
+          cart_save(items);
+        });
+      });
+
+      // Wire remove buttons (remove entire line item)
       this.querySelectorAll('.cart-item-remove').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var idx = parseInt(btn.dataset.index, 10);
