@@ -402,6 +402,18 @@ a:hover {
   color: var(--accent);
 }
 
+.variant-btn.unavailable {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+  text-decoration: line-through;
+  text-decoration-color: var(--muted);
+}
+
+.variant-btn.unavailable:hover {
+  border-color: var(--border);
+}
+
 .variant-height-wrap {
   display: flex;
   align-items: center;
