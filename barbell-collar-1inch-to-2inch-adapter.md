@@ -13,7 +13,7 @@ product:
   offer_count: "3360"
 ---
 
-<product-gallery images="video-6884.mp4, video-6882.mp4, img-6894, img-6889, img-6893, img-6892, img-6891, img-6888, img-6886, img-6890" alt="1 inch to 2 inch barbell adapter for Olympic weight plates"></product-gallery>
+<product-gallery images="video-6882.mp4, video-6884.mp4, img-6894, img-6889, img-6893, img-6892, img-6891, img-6888, img-6886, img-6890" alt="1 inch to 2 inch barbell adapter for Olympic weight plates"></product-gallery>
 
 # 1″ to 2″ Barbell Adapter
 
