@@ -17,7 +17,7 @@ product:
 
 # 1″ to 2″ Barbell Adapter
 
-This barbell sleeve insert lets you use 2-inch (50mm) Olympic weight plates on equipment with 1-inch (25mm) sleeves, like adjustable dumbbells, standard barbells, and loading pins. It fits snug and keeps the plates centered.
+This barbell sleeve insert (also called a barbell spacer or dumbbell spacer) lets you use 2-inch (50mm) Olympic weight plates on equipment with 1-inch (25mm) sleeves, like adjustable dumbbells, standard barbells, and loading pins. It fits snug and keeps the plates centered.
 
 You need one weight plate adapter per sleeve, so a pair works for dumbbells and barbells. Pick the inner diameter to match your bar (US 1″ or EU 30mm), set the height for your plates, and you're done. Manufacturing tolerance: ±0.3mm.
 
