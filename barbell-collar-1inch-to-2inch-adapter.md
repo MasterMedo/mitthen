@@ -3,7 +3,7 @@ layout: barbell-adapter
 title: 1″ to 2″ Barbell Adapter
 seo_title: "1\" to 2\" Barbell Adapter for Olympic Weight Plates"
 description: "Universal barbell adapter that fits 2 inch Olympic weight plates onto 1 inch sleeves. Works on dumbbells, barbells, and loading pins. Adjustable height, ±0.3mm tolerance."
-preload_image: adapter
+preload_image: img-6894
 product:
   name: "1 inch to 2 inch Barbell Adapter"
   sku: "MTN-ADP-1TO2"
@@ -13,7 +13,7 @@ product:
   offer_count: "3360"
 ---
 
-<product-gallery images="adapter, img-6587, img-detail" alt="1 inch to 2 inch barbell adapter for Olympic weight plates"></product-gallery>
+<product-gallery images="img-6894, img-6889, img-6893, img-6892, img-6891, img-6888, img-6886, img-6890, video-6884.mp4, video-6882.mp4" alt="1 inch to 2 inch barbell adapter for Olympic weight plates"></product-gallery>
 
 # 1″ to 2″ Barbell Adapter
 
