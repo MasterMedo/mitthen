@@ -508,7 +508,7 @@
       function media_tag(src, is_active) {
         if (is_video(src)) {
           var base = poster_base(src);
-          return '<video class="gallery-media" poster="/assets/img/' + base + '-1040.jpg" autoplay muted loop playsinline controls preload="metadata" width="520" height="520">' +
+          return '<video class="gallery-media" poster="/assets/img/' + base + '-1040.jpg" loop playsinline controls preload="metadata" width="520" height="520">' +
               '<source src="/assets/img/' + base + '.webm" type="video/webm">' +
               '<source src="/assets/img/' + base + '.mp4" type="video/mp4">' +
             '</video>';
