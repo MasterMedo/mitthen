@@ -144,6 +144,77 @@
     data-worker-url="{{ site.worker_url }}"
   ></div>
   <cart-drawer></cart-drawer>
+  <div class="scroll-egg" id="scroll-egg" role="dialog" aria-modal="true" aria-labelledby="scroll-egg-title" aria-hidden="true">
+    <div class="scroll-egg-card">
+      <div class="scroll-egg-title" id="scroll-egg-title">You found it</div>
+      <p class="scroll-egg-body">Ha, this is so funny, you scroll 10 times.</p>
+      <button type="button" class="scroll-egg-close" id="scroll-egg-close">Back to scrolling</button>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var BURST_GAP_MS = 250;
+      var RESET_AFTER_MS = 5000;
+      var TARGET = 10;
+
+      var overlay = document.getElementById('scroll-egg');
+      var close_btn = document.getElementById('scroll-egg-close');
+      if (!overlay || !close_btn) return;
+
+      var bursts = 0;
+      var last_scroll = 0;
+      var reset_timer = 0;
+      var is_open = false;
+
+      function reset() {
+        bursts = 0;
+        last_scroll = 0;
+        if (reset_timer) { clearTimeout(reset_timer); reset_timer = 0; }
+      }
+
+      function open_egg() {
+        if (is_open) return;
+        is_open = true;
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        close_btn.focus();
+        reset();
+      }
+
+      function close_egg() {
+        if (!is_open) return;
+        is_open = false;
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+      }
+
+      function on_scroll() {
+        if (is_open) return;
+        var now = Date.now();
+        if (now - last_scroll >= BURST_GAP_MS) {
+          bursts += 1;
+          last_scroll = now;
+          if (bursts >= TARGET) {
+            open_egg();
+            return;
+          }
+        } else {
+          last_scroll = now;
+        }
+        if (reset_timer) clearTimeout(reset_timer);
+        reset_timer = setTimeout(reset, RESET_AFTER_MS);
+      }
+
+      window.addEventListener('scroll', on_scroll, { passive: true });
+      close_btn.addEventListener('click', close_egg);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close_egg();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (is_open && e.key === 'Escape') close_egg();
+      });
+    })();
+  </script>
   <script src="{{ '/assets/product.js' | relative_url }}" defer></script>
 
   <main>
